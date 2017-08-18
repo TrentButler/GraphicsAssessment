@@ -1,8 +1,8 @@
 #include "Application.h"
+#include <GLFW\glfw3.h>
 
 Application::Application() {};
 Application::~Application() {};
-
 
 void Application::startup() {};
 
@@ -71,5 +71,4 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 
 		this->shutdown(); //APPLICATION SPECIFIC SHUTDOWN METHOD, TERMINATE THE PROGRAM
 	}
-
 }
