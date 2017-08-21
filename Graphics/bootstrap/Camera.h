@@ -31,6 +31,11 @@ public:
 
 private:
 
-	void updateProjectionViewTransform();
+	void _updateProjectionViewTransform();
+
+	glm::mat4 _worldTransform;
+	glm::mat4 _viewTransform;
+	glm::mat4 _projectionTransform;
+	glm::mat4 _viewProjectionTransform;
 
 };
