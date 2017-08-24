@@ -10,13 +10,10 @@
 */
 
 
-Camera::Camera()
+Camera::Camera() : _worldTransform(1), _viewTransform(1), _projectionTransform(1)
 {
-	//INITLIZE THE CAMERA'S TRANSFOMRMS
-	this->_worldTransform = glm::mat4(1);
-	/*this->_viewTransform = glm::mat4(1);
-	this->_projectionTransform = glm::mat4(1);
-	this->_viewProjectionTransform = glm::mat4(1);*/
+	
+	
 }
 
 Camera::~Camera() {};
@@ -49,9 +46,6 @@ void Camera::setPerspective(float FOV, float aspectRatio, float nearClip, float 
 
 void Camera::setLookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up)
 {
-	//NEEDS WORK
-	//08-24-17 - YOU ARE SHIT. WHY ARE YOU HERE?
-
 	//CALCULATE A FOWARD VECTOR
 	//Z = NORMALIZE(EYE - CENTER)
 	//X = NORMALIZE(CROSS(UP, Z))
@@ -65,9 +59,9 @@ void Camera::setLookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up)
 	auto Y = glm::cross(Z, X);
 
 	glm::mat4 V = glm::mat4(
-		glm::vec4(X.x, X.y, X.z, 0),
-		glm::vec4(Y.x, Y.y, Y.z, 0),
-		glm::vec4(Z.x, Z.y, Z.z, 0),
+		glm::vec4(X.x, Y.x, Z.x, 0),
+		glm::vec4(X.y, Y.y, Z.y, 0),
+		glm::vec4(X.z, Y.z, Z.z, 0),
 		glm::vec4(0, 0, 0, 1)
 	);
 
@@ -78,11 +72,12 @@ void Camera::setLookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up)
 		glm::vec4(-eye.x, -eye.y, -eye.z, 1)
 	);
 
-	//auto newCam = Translation * V;
 	auto newCam = V * Translation;
 	auto glmCam = glm::lookAt(eye, center, up);
 	assert(newCam == glmCam);
 	
+	this->_viewTransform = newCam;
+	this->_worldTransform = glm::inverse(this->_viewTransform);
 }
 
 void Camera::setPosition(glm::vec3 position)
@@ -108,7 +103,7 @@ glm::mat4 Camera::getProjection()
 
 glm::mat4 Camera::getProjectionView()
 {
-	//this->_updateProjectionViewTransform();
+	this->_updateProjectionViewTransform();
 	return this->_viewProjectionTransform;
 }
 

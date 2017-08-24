@@ -31,10 +31,12 @@ void App::draw()
 {
 	Gizmos::clear();
 	
-	
-	//Gizmos::addTri(glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0), glm::bvec3(1, 0, 0), glm::vec4(0.0f, 0.8f, 0.0f, 0.6f));	
 	Gizmos::addSphere(glm::vec3(0), 1, 20, 20, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	Gizmos::addTransform(glm::mat4(1));
+
+	/*Gizmos::addTri(glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0), glm::bvec3(1, 0, 0), glm::vec4(0.0f, 0.8f, 0.0f, 0.6f));	
+	Gizmos::addTransform(glm::mat4(1));*/
+
 	Gizmos::draw(this->_camera->getProjectionView());
 	/*Gizmos::draw(glm::mat4(1));
 	auto View = this->_camera->getView();*/
