@@ -9,6 +9,7 @@ void Application::startup() {};
 
 void Application::shutdown() 
 {
+	shutdown(); //CHILD CLASS METHOD IMPLEMENTATION
 	glfwDestroyWindow(_window);
 	glfwTerminate();
 }
@@ -57,14 +58,22 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 
 		startup(); //CHILD CLASS METHOD IMPLEMENTATION
 
+		float deltaTime = 0; //USED TO CALCULATE DELTATIME
+		float prevTime = 0; //USED TO CALCULATE DELTATIME
+		float currTime = 0; //USED TO CALCULATE DELTATIME
+
+
 		while (glfwWindowShouldClose(_window) == GL_FALSE) //LOOP UNTIL 'glfwWindowShouldClose() == GL_TRUE'
 		{
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //CLEAR THE WINDOW
 
-			float deltaTime = 0; //USED TO CALCULATE DELTATIME
+			currTime = glfwGetTime(); 
+			deltaTime = currTime - prevTime; //DELTATIME CALCULATION
+
 			update(deltaTime); //CHILD CLASS METHOD IMPLEMENTATION
 			draw(); //CHILD CLASS METHOD IMPLEMENTATION
 
+			prevTime = currTime;
 			glfwSwapBuffers(_window); //SWAP THE FRONT AND BACK BUFFERS
 			glfwPollEvents(); //CHECK FOR ANY EVENTS
 		}

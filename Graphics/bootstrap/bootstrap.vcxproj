@@ -125,7 +125,9 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CameraApp.cpp" />
     <ClCompile Include="FlyCamera.cpp" />
+    <ClCompile Include="FPSCamera.cpp" />
     <ClCompile Include="Gizmos.cpp" />
     <ClCompile Include="gl_core_4_4.c" />
     <ClCompile Include="main.cpp" />
@@ -134,7 +136,9 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraApp.h" />
     <ClInclude Include="FlyCamera.h" />
+    <ClInclude Include="FPSCamera.h" />
     <ClInclude Include="Gizmos.h" />
     <ClInclude Include="gl_core_4_4.h" />
   </ItemGroup>

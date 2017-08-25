@@ -1,12 +1,12 @@
 #pragma once
 #include "Application.h"
 
-class App : public Application
+struct Camera;
+class CameraApp : public Application
 {
-
 public:
-	App() {}
-	~App() {}
+	CameraApp();
+	~CameraApp();
 	void run(const char* title, unsigned int width, unsigned int height, bool fullscreen);
 
 protected:
@@ -16,5 +16,6 @@ protected:
 	virtual void draw();
 
 	GLFWwindow* _window;
-	GLFWmonitor* _monitor;	
+	GLFWmonitor* _monitor;
+	Camera* _camera;
 };

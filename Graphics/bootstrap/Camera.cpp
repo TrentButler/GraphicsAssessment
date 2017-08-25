@@ -2,7 +2,6 @@
 #include <assert.h>
 #include <ext.hpp>
 
-
 /*	glm::mat4 _worldTransform;
 	glm::mat4 _viewTransform;
 	glm::mat4 _projectionTransform;
@@ -20,7 +19,7 @@ Camera::~Camera() {};
 
 void Camera::update(float deltaTime)
 {
-	//this->_updateProjectionViewTransform();
+	update(deltaTime);
 }
 
 void Camera::setPerspective(float FOV, float aspectRatio, float nearClip, float farClip)
@@ -78,12 +77,27 @@ void Camera::setLookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up)
 	
 	this->_viewTransform = newCam;
 	this->_worldTransform = glm::inverse(this->_viewTransform);
+	
+	if(this->_projectionTransform != glm::mat4(1))
+		this->_updateProjectionViewTransform();
 }
 
 void Camera::setPosition(glm::vec3 position)
 {
-	this->_viewTransform = glm::mat4(glm::vec4(1, 0, 0, 0), glm::vec4(0, 1, 0, 0),
+	auto Translation = glm::mat4(glm::vec4(1, 0, 0, 0), glm::vec4(0, 1, 0, 0),
 		glm::vec4(0, 0, 1, 0), glm::vec4(position.x, position.y, position.z, 1));
+
+	//this->_viewTransform = this->_viewTransform * Translation;
+
+	this->_viewTransform = Translation;
+	this->_worldTransform = glm::inverse(this->_viewTransform);
+}
+
+void Camera::setWorldTransform(glm::mat4 world) 
+{
+	this->_worldTransform = world;
+	this->_viewTransform = glm::inverse(this->_worldTransform);
+	this->_updateProjectionViewTransform();
 }
 
 glm::mat4 Camera::getWorldTransform()

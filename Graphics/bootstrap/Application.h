@@ -3,7 +3,6 @@
 
 struct GLFWmonitor;
 struct GLFWwindow;
-struct Camera;
 class Application
 {
 
@@ -20,6 +19,4 @@ protected:
 
 	GLFWwindow* _window;
 	GLFWmonitor* _monitor;
-	Camera* _camera;
-
 };

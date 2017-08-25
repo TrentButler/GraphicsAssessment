@@ -22,6 +22,8 @@ public:
 
 	void setPosition(glm::vec3 position);
 
+	void setWorldTransform(glm::mat4 world);
+
 	glm::mat4 getWorldTransform();
 
 	glm::mat4 getView();

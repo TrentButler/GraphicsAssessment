@@ -1,11 +1,7 @@
-#include "App.h"
-#include <glm.hpp>
-#include <iostream>
-using namespace std;
-
+#include "CameraApp.h"
 
 int main()
 {
-	Application* app = new App();
-	app->run("app", 1000, 600, false);
+	Application* app = new CameraApp();
+	app->run("app", 1200, 600, false);
 }
