@@ -24,7 +24,9 @@ void CameraApp::startup()
 
 void CameraApp::shutdown() {};
 
-
+static double prevMouseX = 0;
+static double prevMouseY = 0;
+static glm::vec2 deltaMouse = glm::vec2(0);
 glm::mat4 sphere = glm::mat4(1);
 glm::mat4 biggerSphere = glm::mat4(1);
 void CameraApp::update(float deltaTime) 
@@ -33,7 +35,9 @@ void CameraApp::update(float deltaTime)
 
 	//LOOK AROUND
 	//DERIVE A DELTA FROM MOUSE MOVEMENT
-	static bool MousePressed = false;
+	
+
+	/*static bool MousePressed = false;
 	if (glfwGetMouseButton(Application::_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) //MOUSE CLICKED
 	{	
 		static double PrevMouseX = 0;
@@ -82,6 +86,20 @@ void CameraApp::update(float deltaTime)
 		cout << "\n" << mouseDelta.x << mouseDelta.y;
 
 		this->_camera->setWorldTransform(newWorld);
+	}
+*/
+
+	static bool pressed = false;
+	if (glfwGetMouseButton(Application::_window, 0) == true)
+	{
+		if (pressed == false)
+		{
+			pressed = true;
+			glfwGetCursorPos(Application::_window, &prevMouseX, &prevMouseY);
+		}
+
+		//auto mousePos = 
+		//deltaMouse = glm::vec2()
 	}
 
 	//MOVE CAMERA
