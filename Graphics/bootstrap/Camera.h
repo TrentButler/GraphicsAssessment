@@ -4,8 +4,6 @@
 #include <vec3.hpp>
 #include <vec4.hpp>
 
-//struct mat4;
-//struct vec3;
 class Camera
 {
 
@@ -17,6 +15,8 @@ public:
 	virtual void update(float deltaTime) = 0;
 
 	void setPerspective(float FOV, float aspectRatio, float nearClip, float farClip);
+
+	void Camera::setOrtho(float left, float right, float top, float bottom, float farClip, float nearClip);
 
 	void setLookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up);
 
@@ -40,5 +40,4 @@ private:
 	glm::mat4 _viewTransform;
 	glm::mat4 _projectionTransform;
 	glm::mat4 _viewProjectionTransform;
-
 };

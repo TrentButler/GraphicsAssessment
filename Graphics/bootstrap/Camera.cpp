@@ -43,6 +43,31 @@ void Camera::setPerspective(float FOV, float aspectRatio, float nearClip, float 
 	this->_updateProjectionViewTransform();
 }
 
+void Camera::setOrtho(float left, float right, float top, float bottom, float farClip, float nearClip)
+{
+	auto X = 2 / (right - left);
+	auto Y = 2 / (top - bottom);
+	auto Z = -2 / (farClip - nearClip);
+
+	auto Xx = -((right + left) / (right - left));
+	auto Yy = -((top + bottom) / (top - bottom));
+	auto Zz = -((farClip + nearClip) / (farClip - nearClip));
+
+	glm::mat4 Projection = glm::mat4(
+		glm::vec4(X, 0, 0, 0),
+		glm::vec4(0, Y, 0, 0),
+		glm::vec4(0, 0, Z, 0),
+		glm::vec4(Xx, Yy, Zz, 1));
+
+	glm::mat4 glmOrtho = glm::ortho(left, right, bottom, top, nearClip, farClip);
+
+	assert(Projection == glmOrtho);
+
+	this->_projectionTransform = Projection;
+	this->_updateProjectionViewTransform();
+
+}
+
 void Camera::setLookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up)
 {
 	//CALCULATE A FOWARD VECTOR
@@ -107,7 +132,7 @@ glm::mat4 Camera::getWorldTransform()
 
 glm::mat4 Camera::getView()
 {
-	return this->_viewTransform;
+	return this->_viewTransform;	
 }
 
 glm::mat4 Camera::getProjection()

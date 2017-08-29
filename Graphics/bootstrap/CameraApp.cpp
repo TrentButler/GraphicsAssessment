@@ -15,8 +15,9 @@ void CameraApp::startup()
 {
 	//INITLIZE CAMERA
 	this->_camera = new FPSCamera();
-	this->_camera->setLookAt(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	this->_camera->setPerspective(3.14f / 4.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+	this->_camera->setLookAt(glm::vec3(0.1f, 0.1f, -10.0f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	this->_camera->setPerspective(3.14f / 4.0f, 16.0f / 9.0f, 0.1f, 100.0f);	
+	//this->_camera->setOrtho(0.0f, 1.50f, 1.50f, 0.0f, 100.0f, 0.1f);
 
 	Gizmos::create();
 }
@@ -25,11 +26,12 @@ void CameraApp::shutdown() {};
 
 
 glm::mat4 sphere = glm::mat4(1);
+glm::mat4 biggerSphere = glm::mat4(1);
 void CameraApp::update(float deltaTime) 
 {
 	//NEEDS WORK
-	//LOOK AROUND
 
+	//LOOK AROUND
 	//DERIVE A DELTA FROM MOUSE MOVEMENT
 	static bool MousePressed = false;
 	if (glfwGetMouseButton(Application::_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) //MOUSE CLICKED
@@ -89,7 +91,7 @@ void CameraApp::update(float deltaTime)
 		//GET PREVIOUS POSITION, TRANSLATE, THEN SET IT
 		auto Previous = this->_camera->getWorldTransform();
 		auto Translation = glm::mat4(glm::vec4(1, 0, 0, 0), glm::vec4(0, 1, 0, 0),
-			glm::vec4(0, 0, 1, 0), glm::vec4(0, 0, -1, 1));
+			glm::vec4(0, 0, 1, 0), glm::vec4(0, 0, -0.5, 1));
 
 		//auto newPositon = (Previous * Translation)[3];
 		//this->_camera->setPosition(newPositon);
@@ -102,7 +104,7 @@ void CameraApp::update(float deltaTime)
 		//MOVE BACKWARD (-Z)
 		auto Previous = this->_camera->getWorldTransform();
 		auto Translation = glm::mat4(glm::vec4(1, 0, 0, 0), glm::vec4(0, 1, 0, 0),
-			glm::vec4(0, 0, 1, 0), glm::vec4(0, 0, 1, 1));
+			glm::vec4(0, 0, 1, 0), glm::vec4(0, 0, 0.5f, 1));
 
 		//auto newPositon = (Previous * Translation)[3];
 		//this->_camera->setPosition(newPositon);
@@ -115,7 +117,7 @@ void CameraApp::update(float deltaTime)
 		//MOVE LEFT (+X)
 		auto Previous = this->_camera->getWorldTransform();
 		auto Translation = glm::mat4(glm::vec4(1, 0, 0, 0), glm::vec4(0, 1, 0, 0),
-			glm::vec4(0, 0, 1, 0), glm::vec4(-1, 0, 0, 1));
+			glm::vec4(0, 0, 1, 0), glm::vec4(-0.5, 0, 0, 1));
 
 		//auto newPositon = (Previous * Translation)[3];
 		//this->_camera->setPosition(newPositon);
@@ -128,13 +130,45 @@ void CameraApp::update(float deltaTime)
 		//MOVE RIGHT (-X)
 		auto Previous = this->_camera->getWorldTransform();
 		auto Translation = glm::mat4(glm::vec4(1, 0, 0, 0), glm::vec4(0, 1, 0, 0),
-			glm::vec4(0, 0, 1, 0), glm::vec4(1, 0, 0, 1));
+			glm::vec4(0, 0, 1, 0), glm::vec4(0.5, 0, 0, 1));
 
 		//auto newPositon = (Previous * Translation)[3];
 		//this->_camera->setPosition(newPositon);
 		auto newWorld = Previous * Translation;
 		this->_camera->setWorldTransform(newWorld);
 	}
+
+
+	//CHANGE CURRENT PROJECTION
+	if (glfwGetKey(Application::_window, GLFW_KEY_F1))
+	{
+		//CHANGE PROJECTION
+		this->_camera->setOrtho(0.0f, 2.0f, 2.0f, 0.0f, 100.0f, 0.1f);
+		
+	}
+
+	if (glfwGetKey(Application::_window, GLFW_KEY_F2))
+	{
+		this->_camera->setPerspective(3.14f / 4.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+	}
+
+	//LOOK AT A OBJECT
+	if (glfwGetKey(Application::_window, GLFW_KEY_1))
+	{
+		this->_camera->setLookAt(this->_camera->getView()[3], sphere[3], glm::vec3(0, 1, 0));
+	}
+
+	if (glfwGetKey(Application::_window, GLFW_KEY_2))
+	{
+		this->_camera->setLookAt(this->_camera->getView()[3], biggerSphere[3], glm::vec3(0, 1, 0));
+	}
+	
+	auto Translation = glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(0, 0, 1, 0),
+		glm::vec4(10, 0, -12, 1));
+	biggerSphere = sphere * Translation;
 
 }
 
@@ -144,6 +178,9 @@ void CameraApp::draw()
 	Gizmos::clear();
 
 	Gizmos::addSphere(sphere[3], 1, 10, 10, glm::vec4(0.0f, 1.0f, 0.0f, 0.4f), &sphere);
+	Gizmos::addTransform(sphere, 4);
+
+	Gizmos::addSphere(biggerSphere[3], 2, 10, 10, glm::vec4(0.0f, 0.0f, 1.0f, 0.4f), &biggerSphere);
 	Gizmos::addTransform(sphere, 4);
 
 	//Gizmos::addTri(glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0), glm::bvec3(1, 0, 0), glm::vec4(0.0f, 0.8f, 0.0f, 0.6f));
