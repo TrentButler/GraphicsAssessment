@@ -54,7 +54,7 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 			return; //TERMINATE PROGRAM
 		}
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //SET A CLEAR COLOR FOR THE BACKGROUND
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f); //SET A CLEAR COLOR FOR THE BACKGROUND
 
 		startup(); //CHILD CLASS METHOD IMPLEMENTATION
 

@@ -1,0 +1,111 @@
+#include "RenderApp.h"
+#include <FPSCamera.h>
+#include "Shader.h"
+#include <glm.hpp>
+#include <ext.hpp>
+
+
+RenderApp::RenderApp() {};
+RenderApp::~RenderApp() {};
+
+void RenderApp::genGrid(unsigned int rows, unsigned int cols)
+{
+	this->_rows = rows;
+	this->_cols = cols;
+
+	Vertex* gridVerts = new Vertex[rows * cols];
+
+	for (unsigned int row = 0; row < rows; row++)
+	{
+		for (unsigned int col = 0; col < cols; col++)
+		{
+			gridVerts[row * col + col].position = glm::vec4(float(col), 0, float(row), 1);
+			gridVerts[row * col + col].color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
+
+	//RESEARCH THIS
+	unsigned int* gridIndices = new unsigned int[(rows - 1) * (cols - 1) * 6];
+	unsigned int index = 0;
+	for (unsigned int row = 0; row < (rows - 1); row++)
+	{
+		for (unsigned int col = 0; col < (cols - 1); col++)
+		{
+			gridIndices[index++] = row * cols + col;
+			gridIndices[index++] = (row + 1) * cols + col;
+			gridIndices[index++] = (row + 1) * cols + (col + 1);
+
+			gridIndices[index++] = row * cols + col;
+			gridIndices[index++] = (row + 1) * cols + (col + 1);
+			gridIndices[index++] = row * cols + (col + 1);
+		}
+	}
+	
+
+	//GIVE INFO TO THE VBO AND IBO	
+	glGenVertexArrays(1, &_vao); //GENRATE THE VERTEX ARRAY OBJECT BEFORE THE VBO AND IBO
+	glBindVertexArray(_vao);	//BIND THE VAO
+
+	glGenBuffers(1, &_vbo); //GENERATE A VBO
+	glGenBuffers(1, &_ibo); //GENERATE A IBO
+	glEnableVertexAttribArray(_vao); //ENABLE THE VERTEX ARRAY OBJECT
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo); //BIND THE VBO
+	glBufferData(GL_ARRAY_BUFFER, (rows * cols) * sizeof(Vertex), gridVerts, GL_STATIC_DRAW); //DEFINE THE SIZE OF THE VBO AND STORE THE INFORMATION FROM 'gridVerts'
+	
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo); //BIND THE IBO
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+		(rows - 1) * (cols - 1) * 6 * sizeof(unsigned int), gridIndices, GL_STATIC_DRAW); //DEFINE THE SIZE OF THE IBO AND STORE THE INFORMATION FROM 'gridIndices'
+	
+	
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0); //DEFINE THE SIZE OF THE VAO
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)sizeof( glm::vec4)); //DEFINE THE SIZE OF THE VAO
+
+	glBindVertexArray(0); //UNBIND THE VAO
+	glBindBuffer(GL_ARRAY_BUFFER, 0); //UNBIND THE VBO
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //UNBIND THE IBO
+	delete[] gridVerts;
+	delete[] gridIndices;
+
+}
+
+void RenderApp::startup()
+{
+	this->_camera = new FPSCamera();
+	this->_camera->setLookAt(glm::vec3(10, 10, 10), glm::vec3(0), glm::vec3(0, 1, 0));
+	this->_camera->setPerspective(3.14f / 4.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+
+	this->_shader = new Shader();	
+	this->_shader->LoadShader("shader.vert", "shader.frag");
+
+	this->genGrid(10, 10);
+}
+
+void RenderApp::shutdown()
+{
+}
+
+void RenderApp::update(float time)
+{
+}
+
+void RenderApp::draw()
+{
+	glUseProgram(this->_shader->getShaderProgID());
+
+	unsigned int projectionViewUniform =
+		glGetUniformLocation(this->_shader->getShaderProgID(), "ProjectionViewWorld");
+	glm::mat4 view = glm::lookAt(glm::vec3(10, 10, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 proj = glm::perspective(glm::quarter_pi<float>(), 16 / 9.f, .1f, 1000.f);
+	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(view * proj));
+	glBindVertexArray(this->_vao);
+
+	unsigned int indexCount = (this->_rows - 1) * (this->_cols - 1) * 6;
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+
+
+
+}

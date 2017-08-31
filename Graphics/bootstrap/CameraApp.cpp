@@ -2,6 +2,7 @@
 #include "FPSCamera.h"
 #include <glfw3.h>
 #include <glm.hpp>
+#include "Gizmos.h"
 
 CameraApp::CameraApp() {};
 CameraApp::~CameraApp() {};
@@ -14,6 +15,8 @@ void CameraApp::startup()
 	this->_camera->setLookAt(glm::vec3(0.1f, 0.1f, -10.0f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); //ORIENT THE CAMERA
 	this->_camera->setPerspective(3.14f / 4.0f, 16.0f / 9.0f, 0.1f, 100.0f); //DEFINE THE CAMERA'S PROJECTION
 	//this->_camera->setOrtho(0.0f, 1.50f, 1.50f, 0.0f, 100.0f, 0.1f);
+
+	Gizmos::create();
 }
 
 void CameraApp::shutdown() {};
@@ -185,5 +188,16 @@ void CameraApp::update(float deltaTime)
 
 void CameraApp::draw()
 {
-	
+	Gizmos::clear();
+
+	Gizmos::addSphere(sphere[3], 1, 10, 10, glm::vec4(0.0f, 1.0f, 0.0f, 0.4f), &sphere);
+	Gizmos::addTransform(sphere, 4);
+
+	Gizmos::addSphere(biggerSphere[3], 2, 10, 10, glm::vec4(0.0f, 0.0f, 1.0f, 0.4f), &biggerSphere);
+	Gizmos::addTransform(sphere, 4);
+
+	//Gizmos::addTri(glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0), glm::bvec3(1, 0, 0), glm::vec4(0.0f, 0.8f, 0.0f, 0.6f));
+
+
+	Gizmos::draw(this->_camera->getProjectionView());
 }
