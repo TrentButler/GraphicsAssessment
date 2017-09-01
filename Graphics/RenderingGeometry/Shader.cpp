@@ -14,7 +14,7 @@ void Shader::LoadShader(const char* vert, const char* frag)
 	system("pause");*/
 
 	char previousDir[MAX_PATH];
-	const char* shaderDir = "..\\Debug\\[shaders]";
+	const char* shaderDir = "..\\[shaders]";
 	GetCurrentDirectory(MAX_PATH, previousDir);
 	SetCurrentDirectory(shaderDir);
 
