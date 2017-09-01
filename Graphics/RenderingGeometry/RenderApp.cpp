@@ -43,19 +43,18 @@ void RenderApp::genGrid(unsigned int rows, unsigned int cols)
 	
 
 	//GIVE INFO TO THE VBO AND IBO	
-	glGenVertexArrays(1, &_vao); //GENRATE THE VERTEX ARRAY OBJECT BEFORE THE VBO AND IBO
-	glBindVertexArray(_vao);	//BIND THE VAO
-
-	glGenBuffers(1, &_vbo); //GENERATE A VBO
-	glGenBuffers(1, &_ibo); //GENERATE A IBO
-	glEnableVertexAttribArray(_vao); //ENABLE THE VERTEX ARRAY OBJECT
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo); //BIND THE VBO
-	glBufferData(GL_ARRAY_BUFFER, (rows * cols) * sizeof(Vertex), gridVerts, GL_STATIC_DRAW); //DEFINE THE SIZE OF THE VBO AND STORE THE INFORMATION FROM 'gridVerts'
+	glGenVertexArrays(1, &this->_vao); //GENRATE THE VERTEX ARRAY OBJECT BEFORE THE VBO AND IBO
 	
+	glGenBuffers(1, &this->_vbo); //GENERATE A VBO
+	glGenBuffers(1, &this->_ibo); //GENERATE A IBO
+	glBindVertexArray(this->_vao);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo); //BIND THE IBO
+	glBindBuffer(GL_ARRAY_BUFFER, this->_vbo); //BIND THE VBO
+	glBufferData(GL_ARRAY_BUFFER, (rows * cols) * sizeof(Vertex), gridVerts, GL_STATIC_DRAW); //SEND OPENGL THE VBO'S INFORMATION
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_ibo); //BIND THE IBO
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-		(rows - 1) * (cols - 1) * 6 * sizeof(unsigned int), gridIndices, GL_STATIC_DRAW); //DEFINE THE SIZE OF THE IBO AND STORE THE INFORMATION FROM 'gridIndices'
+		(rows - 1) * (cols - 1) * 6 * sizeof(unsigned int), gridIndices, GL_STATIC_DRAW); //SEND OPENGL THE IBO'S INFORMATION
 	
 	
 	glEnableVertexAttribArray(0);
@@ -77,7 +76,7 @@ void RenderApp::startup()
 	this->_camera->setLookAt(glm::vec3(10, 10, 10), glm::vec3(0), glm::vec3(0, 1, 0));
 	this->_camera->setPerspective(3.14f / 4.0f, 16.0f / 9.0f, 0.1f, 100.0f);
 
-	this->_shader = new Shader();	
+	this->_shader = new Shader();
 	this->_shader->LoadShader("shader.vert", "shader.frag");
 
 	this->genGrid(10, 10);
@@ -97,15 +96,12 @@ void RenderApp::draw()
 
 	unsigned int projectionViewUniform =
 		glGetUniformLocation(this->_shader->getShaderProgID(), "ProjectionViewWorld");
-	glm::mat4 view = glm::lookAt(glm::vec3(10, 10, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	glm::mat4 proj = glm::perspective(glm::quarter_pi<float>(), 16 / 9.f, .1f, 1000.f);
-	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(view * proj));
+
+	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(this->_camera->getProjectionView()));
 	glBindVertexArray(this->_vao);
 
 	unsigned int indexCount = (this->_rows - 1) * (this->_cols - 1) * 6;
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
-
-
-
+	glUseProgram(0);
 }

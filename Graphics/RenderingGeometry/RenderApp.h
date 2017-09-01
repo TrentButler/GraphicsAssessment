@@ -4,8 +4,7 @@
 #include "Shader.h"
 #include <glm.hpp>
 #include <vector>
-struct GLFWwindow;
-struct GLFWmonitor;
+
 struct Vertex
 {
 	glm::vec4 position;
@@ -30,15 +29,7 @@ private:
 	unsigned int _vao;
 	unsigned int _vbo;
 	unsigned int _ibo;
-
-	unsigned int m_vao;
-	unsigned int m_ibo;
-	unsigned int m_vbo;
-
-	std::vector<unsigned int> m_indices;
-	std::vector<Vertex> m_vertices;
-
-
+	
 	int _rows;
 	int _cols;
 

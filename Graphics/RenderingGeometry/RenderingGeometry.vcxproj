@@ -130,10 +130,6 @@
     <ClInclude Include="RenderApp.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Release\[shaders]\shader.frag" />
-    <None Include="..\Release\[shaders]\shader.vert" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

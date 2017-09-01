@@ -10,7 +10,7 @@ void Application::startup() {};
 void Application::shutdown() 
 {
 	shutdown(); //CHILD CLASS METHOD IMPLEMENTATION
-	glfwDestroyWindow(_window);
+	glfwDestroyWindow(this->_window);
 	glfwTerminate();
 }
 
@@ -30,23 +30,26 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 
 	if (title != nullptr && width + height > 0) //NULL CHECK 'title', CHECK IF 'width' + 'height' IS GREATER THAN ZERO
 	{
+		this->_width = width;
+		this->_height = height;
+
 		if (fullscreen == true) //FULLSCREEN CHECK
 		{
-			_window = glfwCreateWindow(width, height, title, _monitor, nullptr); //CREATE A WINDOW
+			this->_window = glfwCreateWindow(width, height, title, _monitor, nullptr); //CREATE A WINDOW
 		}
 
 		if (fullscreen == false) //FULLSCREEN CHECK
 		{
-			_window = glfwCreateWindow(width, height, title, nullptr, nullptr); //CREATE A WINDOW
+			this->_window = glfwCreateWindow(width, height, title, nullptr, nullptr); //CREATE A WINDOW
 		}
 		
-		if (_window == nullptr)
+		if (this->_window == nullptr)
 		{
 			this->shutdown();
 			return;
 		}
 
-		glfwMakeContextCurrent(_window); //GIVE THE WINDOW CONTEXT
+		glfwMakeContextCurrent(this->_window); //GIVE THE WINDOW CONTEXT
 
 		if (ogl_LoadFunctions() == ogl_LOAD_FAILED) // LOAD THE OPENGL FUNCTIONS, IF OPERATION IS UNSUCCESSFUL TERMINATE PROGRAM
 		{
@@ -63,7 +66,7 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 		float currTime = 0; //USED TO CALCULATE DELTATIME
 
 
-		while (glfwWindowShouldClose(_window) == GL_FALSE) //LOOP UNTIL 'glfwWindowShouldClose() == GL_TRUE'
+		while (glfwWindowShouldClose(this->_window) == GL_FALSE) //LOOP UNTIL 'glfwWindowShouldClose() == GL_TRUE'
 		{
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //CLEAR THE WINDOW
 
@@ -74,7 +77,7 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 			draw(); //CHILD CLASS METHOD IMPLEMENTATION
 
 			prevTime = currTime;
-			glfwSwapBuffers(_window); //SWAP THE FRONT AND BACK BUFFERS
+			glfwSwapBuffers(this->_window); //SWAP THE FRONT AND BACK BUFFERS
 			glfwPollEvents(); //CHECK FOR ANY EVENTS
 		}
 

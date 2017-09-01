@@ -17,6 +17,9 @@ protected:
 	virtual void update(float time) = 0;
 	virtual void draw() = 0;
 
+	unsigned int _width;
+	unsigned int _height;
+
 	GLFWwindow* _window;
 	GLFWmonitor* _monitor;
 };

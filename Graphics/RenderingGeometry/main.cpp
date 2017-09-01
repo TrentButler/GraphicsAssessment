@@ -7,10 +7,6 @@ int main()
 {
 	Application* app = new RenderApp();
 	app->run("rendering geometry", 1200, 600, false);
-/*
-	Shader shader;
-	shader.LoadShader("shader.vert", "shader.frag");*/
-
 
 	return 1;
 }
