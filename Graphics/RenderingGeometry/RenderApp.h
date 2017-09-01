@@ -5,11 +5,11 @@
 #include <glm.hpp>
 #include <vector>
 
-struct Vertex
-{
-	glm::vec4 position;
-	glm::vec4 color;
-};
+//struct Vertex
+//{
+//	glm::vec4 position;
+//	glm::vec4 color;
+//};
 class RenderApp : public Application
 {
 public:
