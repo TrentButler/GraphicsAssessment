@@ -2,15 +2,16 @@
 #include <FPSCamera.h>
 #include "Shader.h"
 #include "Mesh.h"
+#include <vec4.hpp>
+#include <gtc/type_ptr.hpp>
+#include <vector>
+
 
 RenderApp::RenderApp() {};
 RenderApp::~RenderApp() {};
 
 void RenderApp::genGrid(unsigned int rows, unsigned int cols)
 {
-	this->_rows = rows;
-	this->_cols = cols;
-
 	//Vertex* gridVerts = new Vertex[rows * cols];
 
 	//for (unsigned int row = 0; row < rows; row++)
@@ -76,11 +77,20 @@ void RenderApp::startup()
 
 	this->_shader = new Shader();
 	this->_shader->LoadShader("shader.vert", "shader.frag");
+	this->_shader->attach();
 
+	Vertex a = { glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) };
+	Vertex b = { glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) };
+	Vertex c = { glm::vec4(-1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) };
 
+	std::vector<Vertex> triangle = { a,b,c };
+	std::vector<unsigned int> triangleIndices = { 0, 1, 2 };
 
+	this->_aObject = new Mesh();
+	this->_aObject->initialize(triangle, triangleIndices);
+	//this->_aObject->create_buffers();
 
-	this->genGrid(10, 10);
+	//this->genGrid(10, 10);
 }
 
 void RenderApp::shutdown()
@@ -93,16 +103,18 @@ void RenderApp::update(float time)
 
 void RenderApp::draw()
 {
-	glUseProgram(this->_shader->getShaderProgID());
+	this->_shader->bind();
 
 	unsigned int projectionViewUniform =
-		glGetUniformLocation(this->_shader->getShaderProgID(), "ProjectionViewWorld");
+		this->_shader->getUniform("ProjectionViewWorld");
 
 	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(this->_camera->getProjectionView()));
-	glBindVertexArray(this->_vao);
 
-	unsigned int indexCount = (this->_rows - 1) * (this->_cols - 1) * 6;
+	this->_aObject->bind();
+
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
-	glUseProgram(0);
+	glDrawElements(GL_TRIANGLES, this->_aObject->index_count, GL_UNSIGNED_INT, 0);
+	
+	this->_aObject->unbind();
+	this->_shader->unbind();
 }

@@ -2,14 +2,8 @@
 #include <Application.h>
 #include <Camera.h>
 #include "Shader.h"
-#include <glm.hpp>
-#include <vector>
+#include "Mesh.h"
 
-//struct Vertex
-//{
-//	glm::vec4 position;
-//	glm::vec4 color;
-//};
 class RenderApp : public Application
 {
 public:
@@ -24,15 +18,8 @@ public:
 	void genGrid(unsigned int rows, unsigned int cols);	
 
 private:
-	
-
-	unsigned int _vao;
-	unsigned int _vbo;
-	unsigned int _ibo;
-	
-	int _rows;
-	int _cols;
 
 	Camera* _camera;
 	Shader* _shader;
+	Mesh* _aObject;
 };

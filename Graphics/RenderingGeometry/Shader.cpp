@@ -8,15 +8,53 @@
 Shader::Shader() {};
 Shader::~Shader() {};
 
+void Shader::bind()
+{
+	glUseProgram(this->_programID);
+}
+
+void Shader::unbind()
+{
+	glUseProgram(0);
+}
+
+void Shader::attach()
+{
+	int progSuccess = GL_FALSE;
+
+	this->_programID = glCreateProgram();
+	glAttachShader(this->_programID, this->vertID);
+	glAttachShader(this->_programID, this->fragID);
+	glLinkProgram(this->_programID); //AFTER LINKING THE SHADER PROGRAM, CHECK FOR ERRORS
+	
+	glGetProgramiv(this->_programID, GL_LINK_STATUS, &progSuccess);
+	if (progSuccess == GL_FALSE) {
+		int infoLogLength = 0;
+		glGetProgramiv(this->_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		char* infoLog = new char[infoLogLength];
+		glGetProgramInfoLog(this->_programID, infoLogLength, 0, infoLog);
+		printf("SHADER PROGRAM COMPILE ERROR\n");
+		printf("%s\n", infoLog);
+		delete[] infoLog;
+	}
+
+}
+
+//NEEDS WORK
 void Shader::LoadShader(const char* vert, const char* frag)
 {
 	/*std::cout << glGetString(GL_SHADING_LANGUAGE_VERSION);
 	system("pause");*/
 
 	char previousDir[MAX_PATH];
-	const char* shaderDir = "..\\[shaders]";
+	char testDir[MAX_PATH];
+
+	const char* shaderDir = "..\\bin\\[shaders]";
 	GetCurrentDirectory(MAX_PATH, previousDir);
+
 	SetCurrentDirectory(shaderDir);
+	GetCurrentDirectory(MAX_PATH, testDir);
+	
 
 	const char* vertSource = NULL;
 	const char* fragSource = NULL;
@@ -51,64 +89,47 @@ void Shader::LoadShader(const char* vert, const char* frag)
 	fragStream.close();
 #pragma endregion
 
-	//AFTER LOADING SHADER SOURCE CODE, COMPILE A SHADER PROGRAM
+	//AFTER LOADING SHADER SOURCE CODE, CHECK FOR ERRORS
 	int vertSuccess = GL_FALSE;
-	int fragSuccess = GL_FALSE;
-	int progSuccess = GL_FALSE;
+	int fragSuccess = GL_FALSE;	
 
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER); //GET A ID FOR THE VERTEX SHADER
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); //GET A ID FOR THE FRAGMENT SHADER
+	this->vertID = glCreateShader(GL_VERTEX_SHADER); //GET A ID FOR THE VERTEX SHADER
+	this->fragID = glCreateShader(GL_FRAGMENT_SHADER); //GET A ID FOR THE FRAGMENT SHADER
 
-	glShaderSource(vertexShader, 1, (const char**)&vertSource, 0);
-	glCompileShader(vertexShader); //AFTER COMPILING VERTEX SHADER, CHECK FOR ERRORS
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertSuccess);
+	glShaderSource(this->vertID, 1, (const char**)&vertSource, 0);
+	glCompileShader(this->vertID); //AFTER COMPILING VERTEX SHADER, CHECK FOR ERRORS
+	glGetShaderiv(this->vertID, GL_COMPILE_STATUS, &vertSuccess);
 	if (vertSuccess == GL_FALSE) {
 		int infoLogLength = 0;
-		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &infoLogLength);
+		glGetShaderiv(this->vertID, GL_INFO_LOG_LENGTH, &infoLogLength);
 		char* infoLog = new char[infoLogLength];
-		glGetShaderInfoLog(vertexShader, infoLogLength, 0, infoLog);
+		glGetShaderInfoLog(this->vertID, infoLogLength, 0, infoLog);
 		printf("VERTEX SHADER COMPILE ERROR\n");
 		printf("%s\n", infoLog);
 		delete[] infoLog;
 	}
 
-	glShaderSource(fragmentShader, 1, (const char**)&fragSource, 0);
-	glCompileShader(fragmentShader); //AFTER COMPILING FRAGMENT SHADER, CHECK FOR ERRORS
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragSuccess);
+	glShaderSource(this->fragID, 1, (const char**)&fragSource, 0);
+	glCompileShader(this->fragID); //AFTER COMPILING FRAGMENT SHADER, CHECK FOR ERRORS
+	glGetShaderiv(this->fragID, GL_COMPILE_STATUS, &fragSuccess);
 	if (fragSuccess == GL_FALSE) {
 		int infoLogLength = 0;
-		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &infoLogLength);
+		glGetShaderiv(this->fragID, GL_INFO_LOG_LENGTH, &infoLogLength);
 		char* infoLog = new char[infoLogLength];
-		glGetShaderInfoLog(fragmentShader, infoLogLength, 0, infoLog);
+		glGetShaderInfoLog(this->fragID, infoLogLength, 0, infoLog);
 		printf("FRAGMENT SHADER COMPILE ERROR\n");
 		printf("%s\n", infoLog);
 		delete[] infoLog;
-	}
-
-	this->_programID = glCreateProgram();
-	glAttachShader(this->_programID, vertexShader);
-	glAttachShader(this->_programID, fragmentShader);
-	glLinkProgram(this->_programID); //AFTER LINKING THE SHADER PROGRAM, CHECK FOR ERRORS
-	glGetProgramiv(this->_programID, GL_LINK_STATUS, &progSuccess);
-	if (progSuccess == GL_FALSE) {
-		int infoLogLength = 0;
-		glGetProgramiv(this->_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
-		char* infoLog = new char[infoLogLength];
-		glGetProgramInfoLog(this->_programID, infoLogLength, 0, infoLog);
-		printf("SHADER PROGRAM COMPILE ERROR\n");
-		printf("%s\n", infoLog);
-		delete[] infoLog;
-	}
-
+	}	
 
 	//AFTER COMPILING THE SHADER PROGRAM, DELETE THE INDIVIDUAL SHADERS
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	/*glDeleteShader(this->vertID);
+	glDeleteShader(this->fragID);*/
 
 	SetCurrentDirectory(previousDir); //RETURN THE WORKING DIRECTORY BACK TO ITS ORIGINAL DIRECTORY
 }
 
-unsigned int Shader::getShaderProgID()
+unsigned int Shader::getUniform(const char* varName)
 {
-	return this->_programID;
+	return glGetUniformLocation(this->_programID, varName);
 }
