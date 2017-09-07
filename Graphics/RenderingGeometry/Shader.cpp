@@ -40,7 +40,6 @@ void Shader::attach()
 
 }
 
-//NEEDS WORK
 void Shader::LoadShader(const char* vert, const char* frag)
 {
 	/*std::cout << glGetString(GL_SHADING_LANGUAGE_VERSION);
@@ -49,12 +48,11 @@ void Shader::LoadShader(const char* vert, const char* frag)
 	char previousDir[MAX_PATH];
 	char testDir[MAX_PATH];
 
-	const char* shaderDir = "..\\bin\\[shaders]";
+	const char* shaderDir = "..\\[bin]\\[shaders]";
 	GetCurrentDirectory(MAX_PATH, previousDir);
 
 	SetCurrentDirectory(shaderDir);
-	GetCurrentDirectory(MAX_PATH, testDir);
-	
+	GetCurrentDirectory(MAX_PATH, testDir);	
 
 	const char* vertSource = NULL;
 	const char* fragSource = NULL;
@@ -79,7 +77,7 @@ void Shader::LoadShader(const char* vert, const char* frag)
 	tmp = ""; //CLEAR OUT TEMPORARY STRING
 
 #pragma region Fragment
-	fragStream.open(vert);
+	fragStream.open(frag);
 	while (fragStream.eof() == false)
 	{
 		std::getline(fragStream, tempString);

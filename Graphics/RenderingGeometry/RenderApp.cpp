@@ -88,7 +88,7 @@ void RenderApp::startup()
 
 	this->_aObject = new Mesh();
 	this->_aObject->initialize(triangle, triangleIndices);
-	//this->_aObject->create_buffers();
+	this->_aObject->create_buffers();
 
 	//this->genGrid(10, 10);
 }
