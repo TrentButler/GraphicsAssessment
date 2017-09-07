@@ -73,11 +73,15 @@ void RenderApp::startup()
 {
 	this->_camera = new FPSCamera();
 	this->_camera->setLookAt(glm::vec3(10, 10, 10), glm::vec3(0), glm::vec3(0, 1, 0));
-	this->_camera->setPerspective(3.14f / 4.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+	this->_camera->setPerspective(3.14f / 4.0f, 16.0f / 9.0f, -0.1f, 1000.0f);
 
-	this->_shader = new Shader();
+	/*this->_shader = new Shader();
 	this->_shader->LoadShader("shader.vert", "shader.frag");
-	this->_shader->attach();
+	this->_shader->attach();*/
+
+	this->anotherShader = new Shader();
+	this->anotherShader->LoadShader("triShader.vert", "triShader.frag");
+	this->anotherShader->attach();
 
 	Vertex a = { glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) };
 	Vertex b = { glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) };
@@ -103,18 +107,20 @@ void RenderApp::update(float time)
 
 void RenderApp::draw()
 {
-	this->_shader->bind();
+	this->anotherShader->bind();
 
+	/*unsigned int projectionViewUniform =
+		this->_shader->getUniform("ProjectionViewWorld");*/
 	unsigned int projectionViewUniform =
-		this->_shader->getUniform("ProjectionViewWorld");
+		this->anotherShader->getUniform("wvProjection");	
 
-	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(this->_camera->getProjectionView()));
-
+	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(this->_camera->getProjectionView())); //SEND PROJECTIONVIEW TRANSFORM TO THE CURRENTLY ACTIVE SHADER PROGRAM
+	
 	this->_aObject->bind();
 
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  
 	glDrawElements(GL_TRIANGLES, this->_aObject->index_count, GL_UNSIGNED_INT, 0);
 	
 	this->_aObject->unbind();
-	this->_shader->unbind();
+	this->anotherShader->unbind();
 }

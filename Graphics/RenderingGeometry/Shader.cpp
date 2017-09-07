@@ -91,8 +91,8 @@ void Shader::LoadShader(const char* vert, const char* frag)
 	int vertSuccess = GL_FALSE;
 	int fragSuccess = GL_FALSE;	
 
-	this->vertID = glCreateShader(GL_VERTEX_SHADER); //GET A ID FOR THE VERTEX SHADER
-	this->fragID = glCreateShader(GL_FRAGMENT_SHADER); //GET A ID FOR THE FRAGMENT SHADER
+	this->vertID = glCreateShader(GL_VERTEX_SHADER); //CREATE AN ID FOR THE VERTEX SHADER
+	this->fragID = glCreateShader(GL_FRAGMENT_SHADER); //CREATE AN ID FOR THE FRAGMENT SHADER
 
 	glShaderSource(this->vertID, 1, (const char**)&vertSource, 0);
 	glCompileShader(this->vertID); //AFTER COMPILING VERTEX SHADER, CHECK FOR ERRORS

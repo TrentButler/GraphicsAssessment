@@ -21,5 +21,6 @@ private:
 
 	Camera* _camera;
 	Shader* _shader;
+	Shader* anotherShader;
 	Mesh* _aObject;
 };
