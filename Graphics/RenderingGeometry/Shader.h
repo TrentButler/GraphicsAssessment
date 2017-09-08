@@ -5,15 +5,19 @@ class Shader
 public:
 	Shader();
 	~Shader();
-
 	void bind();
 	void unbind();
-	void LoadShader(const char* vert, const char* frag);
+	void load(const char * filename, unsigned int type);
 	void attach();
-	unsigned int getUniform(const char* varName);
+	void defaultLoad();
+	//void load();
+	unsigned int getUniform(const char *);
+	unsigned int m_vertexShader;
+	unsigned int m_fragmentShader;
+	const char* vsSource;
+	const char* fsSource;
+	
 
 private:
-	unsigned int _programID;
-	unsigned int vertID;
-	unsigned int fragID;
+	unsigned int m_program;
 };

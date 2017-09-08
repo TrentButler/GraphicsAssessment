@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <vec4.hpp>
 
 struct Vertex
 {
@@ -11,18 +12,22 @@ class Mesh
 public:
 	Mesh();
 	~Mesh();
+
+
+	void initialize(std::vector<Vertex>& verts, std::vector<unsigned int>& indices);
 	void create_buffers();
-	void initialize(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices);
-	void bind();
+
+	void bind(); 
 	void unbind();
 
 	unsigned int index_count;
 	unsigned int vertex_count;
-private:
-	unsigned int _vao;
-	unsigned int _vbo;
-	unsigned int _ibo;
 
-	std::vector<unsigned int> _indices;
-	std::vector<Vertex> _vertices;
+private:
+	unsigned int m_vao;
+	unsigned int m_vbo;
+	unsigned int m_ibo;
+	std::vector<Vertex> m_vertices;
+	std::vector<unsigned int> m_indices;
 };
+
