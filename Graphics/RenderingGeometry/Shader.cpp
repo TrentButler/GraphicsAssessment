@@ -1,5 +1,6 @@
 #include <gl_core_4_4.h>
 #include "Shader.h"
+#include <windows.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -19,11 +20,18 @@ void Shader::unbind()
 
 void Shader::load(const char * filename, unsigned int type) 
 {
-	//POPULATE VSSOURCE AND FSSOURCE	
+	char prevDir[MAX_PATH];
+	const char* shaderDir = "..\\[bin]\\shaders";
+	GetCurrentDirectory(MAX_PATH, prevDir);
+	SetCurrentDirectory(shaderDir);
+	
 	std::fstream codeStream;
 
 	std::string tmp = "";
 	std::string source = "";
+
+	int vertSuccess = GL_FALSE;
+	int fragSuccess = GL_FALSE;
 
 	switch (type)
 	{
@@ -38,9 +46,20 @@ void Shader::load(const char * filename, unsigned int type)
 		}
 		vsSource = source.c_str();
 
-		//COMPILE THE SHADER HERE
-		//CHECK FOR COMPILE ERRORS
-
+		m_vertexShader = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(m_vertexShader, 1, (const char**)&vsSource, 0);
+		glCompileShader(m_vertexShader);
+		glGetShaderiv(m_vertexShader, GL_COMPILE_STATUS, &vertSuccess);
+		if (vertSuccess == GL_FALSE)
+		{
+			int logLength = 0;
+			glGetShaderiv(m_vertexShader, GL_INFO_LOG_LENGTH, &logLength);
+			char* infoLog = new char[logLength];
+			glGetShaderInfoLog(m_vertexShader, logLength, 0, infoLog);
+			printf("VERTEX SHADER COMPILE ERROR\n");
+			printf("%s\n", infoLog);
+			delete[] infoLog;
+		}
 		break;
 
 	case GL_FRAGMENT_SHADER:
@@ -53,15 +72,48 @@ void Shader::load(const char * filename, unsigned int type)
 			source += tmp + "\n";
 		}
 		fsSource = source.c_str();
-
-		//COMPILE THE SHADER HERE
-		//CHECK FOR COMPILE ERRORS
-
+		
+		m_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(m_fragmentShader, 1, (const char**)&fsSource, 0);
+		glCompileShader(m_fragmentShader);
+		glGetShaderiv(m_fragmentShader, GL_COMPILE_STATUS, &fragSuccess);
+		if (fragSuccess == GL_FALSE)
+		{
+			int logLength = 0;
+			glGetShaderiv(m_fragmentShader, GL_INFO_LOG_LENGTH, &logLength);
+			char* infoLog = new char[logLength];
+			glGetShaderInfoLog(m_fragmentShader, logLength, 0, infoLog);
+			printf("FRAGMENT SHADER COMPILE ERROR\n");
+			printf("%s\n", infoLog);
+			delete[] infoLog;
+		}
 		break;
 	}
+
+	SetCurrentDirectory(prevDir);
 }
 
-void Shader::attach() {};
+void Shader::attach() 
+{
+	int progSuccess = GL_FALSE;
+
+	m_program = glCreateProgram();
+	glAttachShader(m_program, m_vertexShader);
+	glAttachShader(m_program, m_fragmentShader);
+	glLinkProgram(m_program);
+
+	glGetProgramiv(m_program, GL_LINK_STATUS, &progSuccess);
+	if (progSuccess = GL_FALSE)
+	{
+		int logLength = 0;
+		glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &logLength);
+		char* infoLog = new char[logLength];
+		glGetProgramInfoLog(m_program, logLength, 0, infoLog);
+		printf("SHADER PROGRAM LINK ERROR\n");
+		printf("%s\n", infoLog);
+		delete[] infoLog;
+	}
+}
 
 void Shader::defaultLoad()
 {
@@ -110,4 +162,7 @@ void Shader::defaultLoad()
 
 //void load();
 
-unsigned int Shader::getUniform(const char *) {};
+unsigned int Shader::getUniform(const char * name) 
+{
+	return glGetUniformLocation(m_program, name);
+}

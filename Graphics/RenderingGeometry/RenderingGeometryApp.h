@@ -3,6 +3,7 @@
 
 class Shader;
 class Mesh;
+class Camera;
 class RenderingGeometryApp : public Application
 {
 public:
@@ -22,4 +23,5 @@ private:
 
 	Mesh* m_object;
 	Shader* m_shader;
+	Camera* m_camera;
 };
