@@ -33,6 +33,9 @@ void RenderingGeometryApp::startup()
 	m_object = new Mesh();
 	m_object->initialize(triVerts, triIndices);
 
+	Mesh* skull = new Mesh();
+	skull->loadOBJ("bad skull.obj");
+
 }
 
 void RenderingGeometryApp::shutdown() {}

@@ -21,6 +21,8 @@ public:
 	void bind(); 
 	void unbind();
 
+	void loadOBJ(const char* fileName);
+
 	unsigned int index_count;
 	unsigned int vertex_count;
 
