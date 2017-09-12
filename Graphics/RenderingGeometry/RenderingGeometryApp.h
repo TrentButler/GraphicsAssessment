@@ -22,6 +22,8 @@ public:
 private:
 
 	Mesh* m_object;
+	Mesh* cat;
+	Mesh* human;
 	Shader* m_shader;
 	Camera* m_camera;
 };
