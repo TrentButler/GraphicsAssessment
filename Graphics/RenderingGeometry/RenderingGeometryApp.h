@@ -3,6 +3,7 @@
 
 class Shader;
 class Mesh;
+class Texture;
 class Camera;
 class RenderingGeometryApp : public Application
 {
@@ -22,8 +23,9 @@ public:
 private:
 
 	Mesh* m_object;
-	Mesh* cat;
-	Mesh* human;
+	Mesh* loadOBJ;
 	Shader* m_shader;
+	Shader* triShader;
+	Texture* m_texture;
 	Camera* m_camera;
 };
