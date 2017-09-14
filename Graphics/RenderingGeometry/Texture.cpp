@@ -13,11 +13,8 @@ Texture::~Texture() {};
 void Texture::load(const char* path, const char* name) 
 {
 	char prevDir[MAX_PATH];
-	char testDir[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, prevDir);
 	SetCurrentDirectory(path);
-	GetCurrentDirectory(MAX_PATH, testDir);
-	std::cout << testDir;
 
 	int imageWidth = 0, imageHeight = 0, imageFormat = 0;
 

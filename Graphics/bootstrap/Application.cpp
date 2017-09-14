@@ -65,6 +65,7 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 		float prevTime = 0; //USED TO CALCULATE DELTATIME
 		float currTime = 0; //USED TO CALCULATE DELTATIME
 
+		glEnable(GL_DEPTH_TEST);
 
 		while (glfwWindowShouldClose(this->_window) == GL_FALSE) //LOOP UNTIL 'glfwWindowShouldClose() == GL_TRUE'
 		{

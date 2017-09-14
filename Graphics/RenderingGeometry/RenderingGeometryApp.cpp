@@ -15,8 +15,8 @@ RenderingGeometryApp::~RenderingGeometryApp() {};
 void RenderingGeometryApp::startup()
 {
 	m_camera = new FlyCamera();
-	m_camera->setLookAt(glm::vec3(10, 10, 10), glm::vec3(0), glm::vec3(0, 1, 0));
-	m_camera->setPerspective(glm::pi<float>() / 4, (float)_width / (float)_height, 0.1f, 1000.0f);
+	m_camera->setLookAt(glm::vec3(100, 100, 100), glm::vec3(0), glm::vec3(0, 1, 0));
+	m_camera->setPerspective(glm::pi<float>() / 4, (float)_width / (float)_height, 2.0f, 1000.0f);
 
 	m_shader = new Shader();
 	m_shader->load("defaultVert.vert", GL_VERTEX_SHADER);
@@ -31,18 +31,19 @@ void RenderingGeometryApp::startup()
 	m_texture = new Texture();
 	m_texture->load("..//[bin]//textures", "jadeTexture.jpg");
 
-	Vertex a = { glm::vec4(5.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0)};
-	Vertex b = { glm::vec4(0.0f, 5.0f, 0.0f, 1.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec4(0) };
-	Vertex c = { glm::vec4(-5.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0) };
+	Vertex a = { glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0) };
+	Vertex b = { glm::vec4(0.0f, 0.0f, 5.0f, 1.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec4(0) };
+	Vertex c = { glm::vec4(5.0f, 0.0f, 5.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0) };
+	Vertex d = { glm::vec4(5.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0) };
 
-	std::vector<Vertex> triVerts = {a, b, c};
-	std::vector<unsigned int> triIndices = { 0, 1, 2 };
+	std::vector<Vertex> triVerts = {a, b, c, d};
+	std::vector<unsigned int> triIndices = { 0, 1, 2, 3};
 
 	m_object = new Mesh();
 	m_object->initialize(triVerts, triIndices);
 
 	loadOBJ = new Mesh();
-	loadOBJ->loadOBJ("..//[bin]//objects//cat", "cat.obj");
+	loadOBJ->loadOBJ("..//[bin]//objects//cube", "cube.obj");	
 }
 
 void RenderingGeometryApp::shutdown() {}
@@ -195,7 +196,7 @@ void RenderingGeometryApp::draw()
 	glUniform1i(diffuseUniform, 0);
 
 	loadOBJ->bind();
-	glDrawElements(GL_TRIANGLES, loadOBJ->index_count, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_QUADS, loadOBJ->index_count, GL_UNSIGNED_INT, 0);
 	loadOBJ->unbind();
 
 	m_shader->unbind();

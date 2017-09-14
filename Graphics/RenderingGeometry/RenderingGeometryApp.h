@@ -27,5 +27,6 @@ private:
 	Shader* m_shader;
 	Shader* triShader;
 	Texture* m_texture;
+	Texture* texture;
 	Camera* m_camera;
 };
