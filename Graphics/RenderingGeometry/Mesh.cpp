@@ -72,6 +72,13 @@ void Mesh::unbind()
 	glBindVertexArray(0);
 }
 
+void Mesh::draw(GLuint mode)
+{
+	bind();
+	glDrawElements(mode, index_count, GL_UNSIGNED_INT, 0);
+	unbind();
+}
+
 void Mesh::loadOBJ(const char* path, const char* fileName)
 {
 	//CHANGE THE WORKING DIR TO "..//[bin]//objects"

@@ -22,11 +22,14 @@ public:
 
 private:
 
-	Mesh* m_object;
-	Mesh* loadOBJ;
-	Shader* m_shader;
-	Shader* triShader;
+	Mesh* m_plane;
+	Mesh* m_cube;
+	Mesh* m_sphere;
+	Mesh* m_loadOBJ;
+
+	Shader* m_defaultShader;
+	Shader* m_textureShader;
 	Texture* m_texture;
-	Texture* texture;
+
 	Camera* m_camera;
 };

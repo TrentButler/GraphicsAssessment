@@ -1,20 +1,113 @@
 #include "RenderingGeometryApp.h"
 #include "Shader.h"
 #include "Mesh.h"
+#include "Texture.h"
 #include <glfw3.h>
 #include <FlyCamera.h>
 #include <vector>
 #include <vec4.hpp>
 #include <ext.hpp>
 #include <gtc/constants.hpp>
+#define PI 3.14159265359
 
 
 #pragma region 1.Function that generates a half circle given a number of points and radius.
+std::vector<Vertex> genHalfCircle(float radius, int numPoints)
+{
+	std::vector<Vertex> verts;
+	auto slice = PI / numPoints - 1;
+	for (int i = 0; i < numPoints; i++)
+	{
+		auto angle = slice * i;
+		glm::vec4 point = glm::vec4(glm::cos(angle), glm::sin(angle), 0, 1);
+		Vertex vert = { point, glm::vec4(1), glm::vec4(0), glm::vec3(0) };
+		verts.push_back(vert);
+	}
 
+	return verts;
+}
 #pragma endregion
 
 #pragma region 2.Function that generates a sphere given a half circle, and number of meridians.
+std::vector<Vertex> generateSphereVerts(std::vector<Vertex> halfCircle, int numMeridians)
+{
+	Vertex a = { glm::vec4(1,0,0,1), glm::vec4(1), glm::vec4(0), glm::vec3(0) };
+	Vertex b = { glm::vec4(0,1,0,1), glm::vec4(1), glm::vec4(0), glm::vec3(0) };
+	Vertex c = { glm::vec4(-1,0,0,1), glm::vec4(1), glm::vec4(0), glm::vec3(0) };
+	std::vector<Vertex> halfCirc = halfCircle;
+	std::vector<Vertex> fullCirc;
 
+	/*for (auto v : halfCirc)
+	{
+		fullCirc.push_back(v);
+	}
+
+	for (int i = 0; i < halfCirc.size(); i++)
+	{
+		auto slice = 360 / 2;
+		auto angle = 45;
+		auto XRot = glm::mat4(
+			glm::vec4(1, 0, 0, 0),
+			glm::vec4(0, glm::cos(angle), glm::sin(angle), 0),
+			glm::vec4(0, -glm::sin(angle), glm::cos(angle), 0),
+			glm::vec4(0, 0, 0, 1)
+		);
+
+		auto originalPoint = halfCirc[i].position;
+		auto newPoint = originalPoint * XRot;
+
+		Vertex vert = { newPoint, glm::vec4(1), glm::vec4(0), glm::vec3(0) };
+
+		fullCirc.push_back(vert);
+	}*/
+
+	std::vector<Vertex> verts;
+
+	int merdians = numMeridians;
+	if (numMeridians < 3)
+	{
+		merdians = 3;
+	}
+
+	for (auto v : halfCirc)
+	{
+		verts.push_back(v); //POPULATE WITH THE ORIGINAL HALF CIRCLE
+	}
+
+	//ROTATE THE POINTS BY AN 'ANGLE' (numMeridians) TIMES
+	for (int i = 0; i < merdians * 2; i++)
+	{
+		auto slice = 360 / merdians * 2;
+		auto angle = slice * i;
+
+		for (int vertCount = 0; vertCount < halfCirc.size(); vertCount++)
+		{
+			//ROTATE THE HALF CIRCLE BY ANGLE
+			/*auto XRot = glm::mat4(
+				glm::vec4(1, 0, 0, 0),
+				glm::vec4(0, glm::cos(angle), glm::sin(angle), 0),
+				glm::vec4(0, -glm::sin(angle), glm::cos(angle), 0),
+				glm::vec4(0, 0, 0, 1)
+			);*/
+
+			auto YRot = glm::mat4(
+				glm::vec4(cosf(angle), 0, -sinf(angle), 0),
+				glm::vec4(0, 1, 0, 0),
+				glm::vec4(sinf(angle), 0, cosf(angle), 0),
+				glm::vec4(0, 0, 0, 1)
+			);
+
+			auto point = halfCirc[vertCount].position;
+			auto rotatedPoint = point * YRot;
+
+			Vertex vert = { rotatedPoint, glm::vec4(1), glm::vec4(0), glm::vec3(0) };
+			verts.push_back(vert);
+		}
+	}
+
+	return verts;
+	//return fullCirc;
+}
 #pragma endregion
 
 #pragma region 3.Function that generates indices for geometry to be rendered using triangle strips.
@@ -22,18 +115,17 @@
 #pragma endregion
 
 #pragma region 4.Ability to render a plane with predefined vertex information.
-Mesh* generatePlane()
+Mesh* generatePlane(int width, int height)
 {
 	Mesh* plane = new Mesh();
 
 	Vertex a = { glm::vec4(0, 0, 0, 1), glm::vec4(0.0f, 0.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //BOTTOM LEFT
-	Vertex b = { glm::vec4(1, 0, 0, 1), glm::vec4(0.0f, 0.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //BOTTOM RIGHT
-	Vertex c = { glm::vec4(1, 0, 1, 1), glm::vec4(0.0f, 0.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //TOP RIGHT
-	Vertex d = { glm::vec4(0, 0, 1, 1), glm::vec4(0.0f, 0.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //TOP LEFT
-	
+	Vertex b = { glm::vec4(width, 0, 0, 1), glm::vec4(0.0f, 0.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //BOTTOM RIGHT
+	Vertex c = { glm::vec4(width, 0, height, 1), glm::vec4(0.0f, 0.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //TOP RIGHT
+	Vertex d = { glm::vec4(0, 0, height, 1), glm::vec4(0.0f, 0.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //TOP LEFT	
 
-	std::vector<Vertex> verts = {a, b, c, d};
-	std::vector<unsigned int> indes = {0, 1, 3, 3, 2, 1};
+	std::vector<Vertex> verts = { a, b, c, d };
+	std::vector<unsigned int> indes = { 0, 1, 3, 3, 2, 1 };
 	plane->initialize(verts, indes);
 
 	return plane;
@@ -42,27 +134,27 @@ Mesh* generatePlane()
 
 #pragma region 5.Ability to render a cube with predefined vertex information.
 
-Mesh* generateCube()
+Mesh* generateCube(float scale)
 {
 	Mesh* Cube = new Mesh();
 
 	Vertex a = { glm::vec4(0.0f,0.0f,0.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BOTTOM LEFT
-	Vertex b = { glm::vec4(1.0f,0.0f,0.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BOTTOM RIGHT
-	Vertex c = { glm::vec4(1.0f,1.0f,0.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // TOP RIGHT
-	Vertex d = { glm::vec4(0.0f,1.0f,0.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // TOP LEFT
-	Vertex e = { glm::vec4(0.0f,0.0f, 1.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BACK BOTTOM LEFT
-	Vertex f = { glm::vec4(1.0f,0.0f, 1.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BACK BACK BOTTOM RIGHT
-	Vertex g = { glm::vec4(1.0f,1.0f, 1.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BACK TOP RIGHT
-	Vertex h = { glm::vec4(0.0f,1.0f, 1.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BACK TOP LEFT
+	Vertex b = { glm::vec4(scale,0.0f,0.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BOTTOM RIGHT
+	Vertex c = { glm::vec4(scale,scale,0.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // TOP RIGHT
+	Vertex d = { glm::vec4(0.0f,scale,0.0f,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // TOP LEFT
+	Vertex e = { glm::vec4(0.0f,0.0f, scale,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BACK BOTTOM LEFT
+	Vertex f = { glm::vec4(scale, 0.0f, scale,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BACK BACK BOTTOM RIGHT
+	Vertex g = { glm::vec4(scale, scale, scale,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BACK TOP RIGHT
+	Vertex h = { glm::vec4(0.0f, scale, scale,1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0), glm::vec3(0) }; // BACK TOP LEFT
 
 	std::vector<Vertex> verts = { a, b, c, d, e, f, g, h };
-	std::vector<unsigned int> indes = { 
+	std::vector<unsigned int> indes = {
 		0,1,3,
 		3,1,2, //FRONT FACE
 
 		4,5,7,
 		7,5,6, //BACK FACE
-		
+
 		4,0,7,
 		7,0,3, //LEFT FACE
 
@@ -87,7 +179,22 @@ Mesh* generateCube()
 #pragma endregion
 
 #pragma region 7.Ability to render the procedurally generated sphere with triangle strips.
+Mesh* generateSphere(float scale, int meridians)
+{
+	Mesh* sphere = new Mesh();
+	int halfCircPointCount = 10;
+	auto halfCirc = genHalfCircle(1, halfCircPointCount);
+	auto sphereVerts = generateSphereVerts(halfCirc, meridians);
+	std::vector<unsigned int> sphereIndices;
 
+	for (int i = 0; i < sphereVerts.size(); i++)
+	{
+		sphereIndices.push_back(i);
+	}
+
+	sphere->initialize(sphereVerts, sphereIndices);
+	return sphere;
+}
 #pragma endregion
 
 #pragma region 8.Ability to load shaders from file using a Shader class object.
@@ -105,26 +212,29 @@ RenderingGeometryApp::~RenderingGeometryApp() {};
 
 void RenderingGeometryApp::startup()
 {
-
 	m_camera = new FlyCamera();
-	m_camera->setLookAt(glm::vec3(10, 10, 10), glm::vec3(0), glm::vec3(0, 1, 0));
+	m_camera->setLookAt(glm::vec3(-20.1f, 50.0f, -100.1f), glm::vec3(0), glm::vec3(0, 1, 0));
 	m_camera->setPerspective(glm::pi<float>() / 4, (float)_width / (float)_height, 0.1f, 1000.0f);
 
-	m_shader = new Shader();
-	m_shader->load("triShader.vert", GL_VERTEX_SHADER);
-	m_shader->load("triShader.frag", GL_FRAGMENT_SHADER);
-	m_shader->attach();
+	m_defaultShader = new Shader();
+	m_defaultShader->load("basicShader.vert", GL_VERTEX_SHADER);
+	m_defaultShader->load("basicShader.frag", GL_FRAGMENT_SHADER);
+	m_defaultShader->attach();
 
-	Vertex a = { glm::vec4(5.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) };
-	Vertex b = { glm::vec4(0.0f, 5.0f, 0.0f, 1.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) };
-	Vertex c = { glm::vec4(-5.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) };
+	m_textureShader = new Shader();
+	m_textureShader->load("textureShader.vert", GL_VERTEX_SHADER);
+	m_textureShader->load("textureShader.frag", GL_FRAGMENT_SHADER);
+	m_textureShader->attach();
 
-	std::vector<Vertex> triVerts = {a, b, c};
-	std::vector<unsigned int> triIndices = { 0, 1, 2 };
+	m_texture = new Texture();
+	m_texture->load("..//[bin]//textures", "furTexture.jpg");
 
-	m_object = generatePlane();
-	//m_object->initialize(triVerts, triIndices);
+	m_plane = generatePlane(100, 100);
+	m_cube = generateCube(10);
+	m_sphere = generateSphere(10, 8);
 
+	m_loadOBJ = new Mesh();
+	m_loadOBJ->loadOBJ("..//[bin]//objects//cylinder", "cylinder.obj");
 }
 
 void RenderingGeometryApp::shutdown() {}
@@ -134,12 +244,15 @@ static double prevMouseY = 0; //USED TO CALCULATE THE MOUSE DELTA Y
 static double yaw = 0; //VARIABLE USED TO STORE THE 'YAW' AMOUNT
 static double pitch = 0; //VARIABLE USED TO STORE THE 'PITCH' AMOUNT
 static glm::vec2 deltaMouse = glm::vec2(0); //VECTOR2 TO STORE THE CHANGE IN MOUSE POSITION
-glm::mat4 triTransform = glm::mat4(1);
-glm::mat4 objTransform = glm::mat4(1);
-void RenderingGeometryApp::update(float deltaTime) 
+glm::mat4 planeTransform = glm::mat4(1);
+glm::mat4 cubeTransform = glm::mat4(1);
+glm::mat4 sphereTransform = glm::mat4(1);
+glm::mat4 loadObjTransform = glm::mat4(1);
+void RenderingGeometryApp::update(float deltaTime)
 {
 	//CAMERA STUFF
 	bool pressed = false;
+	if (glfwGetMouseButton(Application::_window, 0) == true) //MOUSE CLICKED
 	{
 		if (pressed == false)
 		{
@@ -167,34 +280,39 @@ void RenderingGeometryApp::update(float deltaTime)
 			pitch = -89;
 		}
 
-		//auto Front = glm::vec3( //GENERATE AN FRONT DIRECTION FOR THE CAMERA USING THE YAW AND PITCH VALUES
-		//	glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch)),
-		//	glm::sin(glm::radians(pitch)),
-		//	glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch))
-		//);
-		//auto cameraFront = glm::normalize(Front);
+		auto Front = glm::vec3( //GENERATE AN FRONT DIRECTION FOR THE CAMERA USING THE YAW AND PITCH VALUES
+			glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch)),
+			glm::sin(glm::radians(pitch)),
+			glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch))
+		);
+		auto cameraFront = glm::normalize(Front);
 
 
-		//this->_camera->setLookAt(
-		//	this->_camera->getWorldTransform()[3],
-		//	this->_camera->getWorldTransform()[3] + glm::vec4(cameraFront, 1),
-		//	glm::vec3(0, 1, 0));
+		this->m_camera->setLookAt(
+			this->m_camera->getWorldTransform()[3],
+			this->m_camera->getWorldTransform()[3] + glm::vec4(cameraFront, 1),
+			glm::vec3(0, 1, 0));
 
-		auto YRot = glm::mat4(
-			glm::vec4(cosf(deltaMouse.x * deltaTime), 0, -sinf(deltaMouse.x * deltaTime), 0),
-			glm::vec4(0, 1, 0, 0),
-			glm::vec4(sinf(deltaMouse.x * deltaTime), 0, cosf(deltaMouse.x * deltaTime), 0),
-			glm::vec4(0, 0, 0, 1)
+		/*	auto YRot = glm::mat4(
+				glm::vec4(cosf(deltaMouse.x * deltaTime), 0, -sinf(deltaMouse.x * deltaTime), 0),
+				glm::vec4(0, 1, 0, 0),
+				glm::vec4(sinf(deltaMouse.x * deltaTime), 0, cosf(deltaMouse.x * deltaTime), 0),
+				glm::vec4(0, 0, 0, 1)
 			);
 
-		auto XRot = glm::mat4(
-			glm::vec4(1, 0, 0, 0),
-			glm::vec4(0, cosf(deltaMouse.y * deltaTime), sinf(deltaMouse.y * deltaTime), 0),
-			glm::vec4(0, -sinf(deltaMouse.y * deltaTime), cos(deltaMouse.y * deltaTime), 0),
-			glm::vec4(0, 0, 0, 1)
+			auto XRot = glm::mat4(
+				glm::vec4(1, 0, 0, 0),
+				glm::vec4(0, cosf(deltaMouse.y * deltaTime), sinf(deltaMouse.y * deltaTime), 0),
+				glm::vec4(0, -sinf(deltaMouse.y * deltaTime), cos(deltaMouse.y * deltaTime), 0),
+				glm::vec4(0, 0, 0, 1)
 			);
 
-		objTransform = objTransform * YRot;
+			loadObjTransform = loadObjTransform * YRot;*/
+	}
+
+	if (glfwGetMouseButton(Application::_window, 1) == true) //MOUSE CLICKED
+	{
+		m_camera->setLookAt(m_camera->getWorldTransform()[3], glm::vec4(0), glm::vec3(0, 1, 0));
 	}
 
 	if (glfwGetKey(Application::_window, GLFW_KEY_W))
@@ -250,23 +368,97 @@ void RenderingGeometryApp::update(float deltaTime)
 		m_camera->setWorldTransform(newWorld);
 	}
 
+	if (glfwGetKey(Application::_window, GLFW_KEY_Q))
+	{
+		//MOVE UP (+Y)
+		auto Previous = m_camera->getWorldTransform();
+		auto Translation = glm::mat4(
+			glm::vec4(1, 0, 0, 0),
+			glm::vec4(0, 1, 0, 0),
+			glm::vec4(0, 0, 1, 0),
+			glm::vec4(0, 100 * deltaTime, 0, 1));
+
+		//auto newPositon = (Previous * Translation)[3];
+		//this->_camera->setPosition(newPositon);
+		auto newWorld = Previous * Translation;
+		m_camera->setWorldTransform(newWorld);
+	}
+
+	if (glfwGetKey(Application::_window, GLFW_KEY_E))
+	{
+		//MOVE DOWN (-Y)
+		auto Previous = m_camera->getWorldTransform();
+		auto Translation = glm::mat4(
+			glm::vec4(1, 0, 0, 0),
+			glm::vec4(0, 1, 0, 0),
+			glm::vec4(0, 0, 1, 0),
+			glm::vec4(0, -100 * deltaTime, 0, 1));
+
+		//auto newPositon = (Previous * Translation)[3];
+		//this->_camera->setPosition(newPositon);
+		auto newWorld = Previous * Translation;
+		m_camera->setWorldTransform(newWorld);
+	}
+
+	if (glfwGetKey(Application::_window, GLFW_KEY_0))
+	{
+		m_camera->setLookAt(m_camera->getWorldTransform()[3], sphereTransform[3], glm::vec3(0, 1, 0));
+	}
+
+	auto sphereTranslation = glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(0, 0, 1, 0),
+		glm::vec4(50, 20, 50, 1)
+	);
+	sphereTransform = sphereTranslation;
+
+	auto loadOBJTranslation = glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(0, 0, 1, 0),
+		glm::vec4(80, 0, 50, 1)
+	);
+	loadObjTransform = loadOBJTranslation;
 }
 
 void RenderingGeometryApp::draw()
 {
-	m_shader->bind();
-	
-	unsigned int projectionviewUniform = m_shader->getUniform("worldViewProjection");
-
 	auto projView = m_camera->getProjectionView();
 
-	glUniformMatrix4fv(projectionviewUniform, 1, GL_FALSE, glm::value_ptr(projView * objTransform));
+#pragma region Plane
+	m_defaultShader->bind();
+	auto projectionviewUniform = m_defaultShader->getUniform("worldViewProjection"); //GET HANDLE FOR THE UNIFORM MAT4 FOR THE WORLDVIEW MATRIX
+	glUniformMatrix4fv(projectionviewUniform, 1, GL_FALSE, glm::value_ptr(projView * planeTransform)); // SEND THE SHADER PROGRAM A MODELVIEWPROJECTION MATRIX
+	m_plane->draw(GL_TRIANGLES);
+	m_defaultShader->unbind();
+#pragma endregion 
 
-	m_object->bind();
+#pragma region Cube
+	m_defaultShader->bind();
+	auto cProjectionViewUniform = m_defaultShader->getUniform("worldViewProjection");
+	glUniformMatrix4fv(cProjectionViewUniform, 1, GL_FALSE, glm::value_ptr(projView * cubeTransform));
+	m_cube->draw(GL_TRIANGLES);
+	m_defaultShader->unbind();
+#pragma endregion
 
-	glDrawElements(GL_TRIANGLES, m_object->index_count, GL_UNSIGNED_INT, 0);
+#pragma region Sphere
+	m_defaultShader->bind();
+	auto sProjectionViewUniform = m_defaultShader->getUniform("worldViewProjection"); //GET HANDLE FOR THE UNIFORM MAT4 FOR THE WORLDVIEW MATRIX
+	glUniformMatrix4fv(sProjectionViewUniform, 1, GL_FALSE, glm::value_ptr(projView * sphereTransform)); // SEND THE SHADER PROGRAM A MODELVIEWPROJECTION MATRIX	
+	m_sphere->draw(GL_TRIANGLES);
+	m_defaultShader->unbind();
+#pragma endregion
 
-	m_object->unbind();
-	m_shader->unbind();
+#pragma region LoadedObject
+	m_textureShader->bind();
+	m_texture->bind();
+	auto loadProjectionViewUniform = m_textureShader->getUniform("worldViewProjection");
+	//auto loadDiffuseUniform = m_textureShader->getUniform("diffuse");
+	glUniformMatrix4fv(loadProjectionViewUniform, 1, GL_FALSE, glm::value_ptr(projView * loadObjTransform));
+	//glUniform1i(loadDiffuseUniform, 0);
+	m_loadOBJ->draw(GL_TRIANGLES);
+	m_textureShader->unbind();
+#pragma endregion
 
 }

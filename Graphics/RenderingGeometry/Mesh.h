@@ -22,6 +22,8 @@ public:
 	void bind(); 
 	void unbind();
 
+	void draw(GLuint mode);
+
 	void loadOBJ(const char* path, const char* fileName);
 
 	unsigned int index_count;
