@@ -46,21 +46,13 @@ std::vector<Vertex> generateSphereVerts(std::vector<Vertex> halfCircle, int numM
 	}
 
 	//ROTATE THE POINTS BY AN 'ANGLE' (numMeridians) TIMES ON THE XAXIS AND YAXIS
-	for (int i = 0; i < merdians + 1; i++)
+	for (int i = 0; i < merdians; i++)
 	{
-		auto slice = 360 / merdians * 2;
+		auto slice = 360 / merdians;
 		auto angle = slice * i;
 
-		for (int yRotCount = 0; yRotCount < halfCirc.size(); yRotCount++)
+		/*for (int yRotCount = 0; yRotCount < halfCirc.size(); yRotCount++)
 		{
-			//ROTATE THE HALF CIRCLE BY ANGLE
-			/*auto XRot = glm::mat4(
-			glm::vec4(1, 0, 0, 0),
-			glm::vec4(0, glm::cos(angle), glm::sin(angle), 0),
-			glm::vec4(0, -glm::sin(angle), glm::cos(angle), 0),
-			glm::vec4(0, 0, 0, 1)
-			);*/
-
 			auto YRot = glm::mat4(
 				glm::vec4(cosf(angle), 0, -sinf(angle), 0),
 				glm::vec4(0, 1, 0, 0),
@@ -73,7 +65,7 @@ std::vector<Vertex> generateSphereVerts(std::vector<Vertex> halfCircle, int numM
 
 			Vertex vert = { rotatedPoint, glm::vec4(1), glm::vec4(0), glm::vec3(0) };
 			verts.push_back(vert);
-		}
+		}*/
 
 		for (int xrotCount = 0; xrotCount < halfCirc.size(); xrotCount++)
 		{
@@ -219,7 +211,7 @@ void RenderingGeometryApp::startup()
 
 	m_plane = generatePlane(100, 100);
 	m_cube = generateCube(10);
-	m_sphere = generateSphere(10, 8);
+	m_sphere = generateSphere(10, 3);
 
 	m_loadOBJ = new Mesh();
 	m_loadOBJ->loadOBJ("..//[bin]//objects//Tree", "Tree.obj");
@@ -434,7 +426,7 @@ void RenderingGeometryApp::draw()
 	m_defaultShader->bind();
 	auto sProjectionViewUniform = m_defaultShader->getUniform("worldViewProjection"); //GET HANDLE FOR THE UNIFORM MAT4 FOR THE WORLDVIEW MATRIX
 	glUniformMatrix4fv(sProjectionViewUniform, 1, GL_FALSE, glm::value_ptr(projView * sphereTransform)); // SEND THE SHADER PROGRAM A MODELVIEWPROJECTION MATRIX	
-	m_sphere->draw(GL_LINE_STRIP);
+	m_sphere->draw(GL_TRIANGLE_STRIP);
 	m_defaultShader->unbind();
 #pragma endregion
 
