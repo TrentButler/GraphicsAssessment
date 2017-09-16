@@ -31,36 +31,7 @@ std::vector<Vertex> genHalfCircle(float radius, int numPoints)
 #pragma region 2.Function that generates a sphere given a half circle, and number of meridians.
 std::vector<Vertex> generateSphereVerts(std::vector<Vertex> halfCircle, int numMeridians)
 {
-	Vertex a = { glm::vec4(1,0,0,1), glm::vec4(1), glm::vec4(0), glm::vec3(0) };
-	Vertex b = { glm::vec4(0,1,0,1), glm::vec4(1), glm::vec4(0), glm::vec3(0) };
-	Vertex c = { glm::vec4(-1,0,0,1), glm::vec4(1), glm::vec4(0), glm::vec3(0) };
 	std::vector<Vertex> halfCirc = halfCircle;
-	std::vector<Vertex> fullCirc;
-
-	/*for (auto v : halfCirc)
-	{
-		fullCirc.push_back(v);
-	}
-
-	for (int i = 0; i < halfCirc.size(); i++)
-	{
-		auto slice = 360 / 2;
-		auto angle = 45;
-		auto XRot = glm::mat4(
-			glm::vec4(1, 0, 0, 0),
-			glm::vec4(0, glm::cos(angle), glm::sin(angle), 0),
-			glm::vec4(0, -glm::sin(angle), glm::cos(angle), 0),
-			glm::vec4(0, 0, 0, 1)
-		);
-
-		auto originalPoint = halfCirc[i].position;
-		auto newPoint = originalPoint * XRot;
-
-		Vertex vert = { newPoint, glm::vec4(1), glm::vec4(0), glm::vec3(0) };
-
-		fullCirc.push_back(vert);
-	}*/
-
 	std::vector<Vertex> verts;
 
 	int merdians = numMeridians;
@@ -74,20 +45,20 @@ std::vector<Vertex> generateSphereVerts(std::vector<Vertex> halfCircle, int numM
 		verts.push_back(v); //POPULATE WITH THE ORIGINAL HALF CIRCLE
 	}
 
-	//ROTATE THE POINTS BY AN 'ANGLE' (numMeridians) TIMES
-	for (int i = 0; i < merdians * 2; i++)
+	//ROTATE THE POINTS BY AN 'ANGLE' (numMeridians) TIMES ON THE XAXIS AND YAXIS
+	for (int i = 0; i < merdians + 1; i++)
 	{
 		auto slice = 360 / merdians * 2;
 		auto angle = slice * i;
 
-		for (int vertCount = 0; vertCount < halfCirc.size(); vertCount++)
+		for (int yRotCount = 0; yRotCount < halfCirc.size(); yRotCount++)
 		{
 			//ROTATE THE HALF CIRCLE BY ANGLE
 			/*auto XRot = glm::mat4(
-				glm::vec4(1, 0, 0, 0),
-				glm::vec4(0, glm::cos(angle), glm::sin(angle), 0),
-				glm::vec4(0, -glm::sin(angle), glm::cos(angle), 0),
-				glm::vec4(0, 0, 0, 1)
+			glm::vec4(1, 0, 0, 0),
+			glm::vec4(0, glm::cos(angle), glm::sin(angle), 0),
+			glm::vec4(0, -glm::sin(angle), glm::cos(angle), 0),
+			glm::vec4(0, 0, 0, 1)
 			);*/
 
 			auto YRot = glm::mat4(
@@ -95,10 +66,27 @@ std::vector<Vertex> generateSphereVerts(std::vector<Vertex> halfCircle, int numM
 				glm::vec4(0, 1, 0, 0),
 				glm::vec4(sinf(angle), 0, cosf(angle), 0),
 				glm::vec4(0, 0, 0, 1)
-			);
+				);
 
-			auto point = halfCirc[vertCount].position;
+			auto point = halfCirc[yRotCount].position;
 			auto rotatedPoint = point * YRot;
+
+			Vertex vert = { rotatedPoint, glm::vec4(1), glm::vec4(0), glm::vec3(0) };
+			verts.push_back(vert);
+		}
+
+		for (int xrotCount = 0; xrotCount < halfCirc.size(); xrotCount++)
+		{
+			//ROTATE THE HALF CIRCLE BY ANGLE
+			auto XRot = glm::mat4(
+				glm::vec4(1, 0, 0, 0),
+				glm::vec4(0, glm::cos(angle), glm::sin(angle), 0),
+				glm::vec4(0, -glm::sin(angle), glm::cos(angle), 0),
+				glm::vec4(0, 0, 0, 1)
+				);
+
+			auto point = halfCirc[xrotCount].position;
+			auto rotatedPoint = point * XRot;
 
 			Vertex vert = { rotatedPoint, glm::vec4(1), glm::vec4(0), glm::vec3(0) };
 			verts.push_back(vert);
@@ -106,7 +94,6 @@ std::vector<Vertex> generateSphereVerts(std::vector<Vertex> halfCircle, int numM
 	}
 
 	return verts;
-	//return fullCirc;
 }
 #pragma endregion
 
@@ -185,6 +172,7 @@ Mesh* generateSphere(float scale, int meridians)
 	int halfCircPointCount = 10;
 	auto halfCirc = genHalfCircle(1, halfCircPointCount);
 	auto sphereVerts = generateSphereVerts(halfCirc, meridians);
+
 	std::vector<unsigned int> sphereIndices;
 
 	for (int i = 0; i < sphereVerts.size(); i++)
@@ -193,6 +181,7 @@ Mesh* generateSphere(float scale, int meridians)
 	}
 
 	sphere->initialize(sphereVerts, sphereIndices);
+
 	return sphere;
 }
 #pragma endregion
@@ -206,7 +195,6 @@ Mesh* generateSphere(float scale, int meridians)
 
 #pragma endregion
 
-
 RenderingGeometryApp::RenderingGeometryApp() {};
 RenderingGeometryApp::~RenderingGeometryApp() {};
 
@@ -214,7 +202,7 @@ void RenderingGeometryApp::startup()
 {
 	m_camera = new FlyCamera();
 	m_camera->setLookAt(glm::vec3(-20.1f, 50.0f, -100.1f), glm::vec3(0), glm::vec3(0, 1, 0));
-	m_camera->setPerspective(glm::pi<float>() / 4, (float)_width / (float)_height, 0.1f, 1000.0f);
+	m_camera->setPerspective(glm::pi<float>() / 4, (float)_width / (float)_height, 0.1f, 10000.0f);
 
 	m_defaultShader = new Shader();
 	m_defaultShader->load("basicShader.vert", GL_VERTEX_SHADER);
@@ -227,14 +215,14 @@ void RenderingGeometryApp::startup()
 	m_textureShader->attach();
 
 	m_texture = new Texture();
-	m_texture->load("..//[bin]//textures", "furTexture.jpg");
+	m_texture->load("..//[bin]//textures", "debugTexture.jpg");
 
 	m_plane = generatePlane(100, 100);
 	m_cube = generateCube(10);
 	m_sphere = generateSphere(10, 8);
 
 	m_loadOBJ = new Mesh();
-	m_loadOBJ->loadOBJ("..//[bin]//objects//cylinder", "cylinder.obj");
+	m_loadOBJ->loadOBJ("..//[bin]//objects//Tree", "Tree.obj");
 }
 
 void RenderingGeometryApp::shutdown() {}
@@ -284,7 +272,7 @@ void RenderingGeometryApp::update(float deltaTime)
 			glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch)),
 			glm::sin(glm::radians(pitch)),
 			glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch))
-		);
+			);
 		auto cameraFront = glm::normalize(Front);
 
 
@@ -294,20 +282,20 @@ void RenderingGeometryApp::update(float deltaTime)
 			glm::vec3(0, 1, 0));
 
 		/*	auto YRot = glm::mat4(
-				glm::vec4(cosf(deltaMouse.x * deltaTime), 0, -sinf(deltaMouse.x * deltaTime), 0),
-				glm::vec4(0, 1, 0, 0),
-				glm::vec4(sinf(deltaMouse.x * deltaTime), 0, cosf(deltaMouse.x * deltaTime), 0),
-				glm::vec4(0, 0, 0, 1)
-			);
+		glm::vec4(cosf(deltaMouse.x * deltaTime), 0, -sinf(deltaMouse.x * deltaTime), 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(sinf(deltaMouse.x * deltaTime), 0, cosf(deltaMouse.x * deltaTime), 0),
+		glm::vec4(0, 0, 0, 1)
+		);
 
-			auto XRot = glm::mat4(
-				glm::vec4(1, 0, 0, 0),
-				glm::vec4(0, cosf(deltaMouse.y * deltaTime), sinf(deltaMouse.y * deltaTime), 0),
-				glm::vec4(0, -sinf(deltaMouse.y * deltaTime), cos(deltaMouse.y * deltaTime), 0),
-				glm::vec4(0, 0, 0, 1)
-			);
+		auto XRot = glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, cosf(deltaMouse.y * deltaTime), sinf(deltaMouse.y * deltaTime), 0),
+		glm::vec4(0, -sinf(deltaMouse.y * deltaTime), cos(deltaMouse.y * deltaTime), 0),
+		glm::vec4(0, 0, 0, 1)
+		);
 
-			loadObjTransform = loadObjTransform * YRot;*/
+		loadObjTransform = loadObjTransform * YRot;*/
 	}
 
 	if (glfwGetMouseButton(Application::_window, 1) == true) //MOUSE CLICKED
@@ -410,15 +398,15 @@ void RenderingGeometryApp::update(float deltaTime)
 		glm::vec4(0, 1, 0, 0),
 		glm::vec4(0, 0, 1, 0),
 		glm::vec4(50, 20, 50, 1)
-	);
+		);
 	sphereTransform = sphereTranslation;
 
 	auto loadOBJTranslation = glm::mat4(
 		glm::vec4(1, 0, 0, 0),
 		glm::vec4(0, 1, 0, 0),
 		glm::vec4(0, 0, 1, 0),
-		glm::vec4(80, 0, 50, 1)
-	);
+		glm::vec4(90, 0, 90, 1)
+		);
 	loadObjTransform = loadOBJTranslation;
 }
 
@@ -446,7 +434,7 @@ void RenderingGeometryApp::draw()
 	m_defaultShader->bind();
 	auto sProjectionViewUniform = m_defaultShader->getUniform("worldViewProjection"); //GET HANDLE FOR THE UNIFORM MAT4 FOR THE WORLDVIEW MATRIX
 	glUniformMatrix4fv(sProjectionViewUniform, 1, GL_FALSE, glm::value_ptr(projView * sphereTransform)); // SEND THE SHADER PROGRAM A MODELVIEWPROJECTION MATRIX	
-	m_sphere->draw(GL_TRIANGLES);
+	m_sphere->draw(GL_LINE_STRIP);
 	m_defaultShader->unbind();
 #pragma endregion
 
