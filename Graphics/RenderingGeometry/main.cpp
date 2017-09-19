@@ -4,7 +4,7 @@
 int main()
 {
 	Application* app = new RenderingGeometryApp();
-	app->run("rendering geometry", 2160, 1440, true);
+	app->run("rendering geometry", 900, 600, false);
 
 	return 1;
 }

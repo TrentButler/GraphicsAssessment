@@ -19,7 +19,7 @@ std::vector<Vertex> genHalfCircle(float radius, int numPoints)
 	for (int i = 0; i < numPoints; i++)
 	{
 		auto angle = slice * i;
-		glm::vec4 point = glm::vec4(glm::cos(angle), glm::sin(angle), 0, 1);
+		glm::vec4 point = glm::vec4(glm::cos(angle) * radius, glm::sin(angle) * radius, 0, 1);
 		Vertex vert = { point, glm::vec4(1), glm::vec4(0), glm::vec3(0) };
 		verts.push_back(vert);
 	}
@@ -31,56 +31,35 @@ std::vector<Vertex> genHalfCircle(float radius, int numPoints)
 #pragma region 2.Function that generates a sphere given a half circle, and number of meridians.
 std::vector<Vertex> generateSphereVerts(std::vector<Vertex> halfCircle, int numMeridians)
 {
-	std::vector<Vertex> halfCirc = halfCircle;
 	std::vector<Vertex> verts;
-
-	int merdians = numMeridians;
-	if (numMeridians < 3)
+	for (auto v : halfCircle)
 	{
-		merdians = 3;
+		verts.push_back(v);
 	}
 
-	for (auto v : halfCirc)
+	unsigned int meridians = numMeridians;
+	if (meridians < 3)
 	{
-		verts.push_back(v); //POPULATE WITH THE ORIGINAL HALF CIRCLE
+		meridians = 3;
 	}
 
-	//ROTATE THE POINTS BY AN 'ANGLE' (numMeridians) TIMES ON THE XAXIS AND YAXIS
-	for (int i = 0; i < merdians + 1; i++)
+	auto slice = 360 / meridians;
+	for (int meridian = 0; meridian < meridians; meridian++)
 	{
-		auto slice = 360 / merdians;
-		auto angle = slice * i;
-
-		/*for (int yRotCount = 0; yRotCount < halfCirc.size(); yRotCount++)
+		auto angle = slice * meridian;
+		
+		for (int i = 0; i < halfCircle.size(); i++)
 		{
-			auto YRot = glm::mat4(
-				glm::vec4(cosf(angle), 0, -sinf(angle), 0),
-				glm::vec4(0, 1, 0, 0),
-				glm::vec4(sinf(angle), 0, cosf(angle), 0),
-				glm::vec4(0, 0, 0, 1)
-				);
+			auto originalPoint = halfCircle[i].position;
+			glm::vec4 rotatedPoint = glm::vec4(
+				(originalPoint.x * 1) + (originalPoint.y * 0) + (originalPoint.z * 0),
+				(originalPoint.x * 0) + (originalPoint.y * glm::cos(angle)) + (originalPoint.z * glm::sin(angle)),
+				(originalPoint.x * 0) + (originalPoint.y * -(glm::sin(angle))) + (originalPoint.z * glm::cos(angle)),
+				1
+			); // X AXIS ROTATION
 
-			auto point = halfCirc[yRotCount].position;
-			auto rotatedPoint = point * YRot;
+			Vertex vert = { rotatedPoint, glm::vec4(1), glm::vec4(0), glm::vec3(0) };		
 
-			Vertex vert = { rotatedPoint, glm::vec4(1), glm::vec4(0), glm::vec3(0) };
-			verts.push_back(vert);
-		}*/
-
-		for (int xrotCount = 0; xrotCount < halfCirc.size(); xrotCount++)
-		{
-			//ROTATE THE HALF CIRCLE BY ANGLE
-			auto XRot = glm::mat4(
-				glm::vec4(1, 0, 0, 0),
-				glm::vec4(0, glm::cos(angle), glm::sin(angle), 0),
-				glm::vec4(0, -glm::sin(angle), glm::cos(angle), 0),
-				glm::vec4(0, 0, 0, 1)
-				);
-
-			auto point = halfCirc[xrotCount].position;
-			auto rotatedPoint = point * XRot;
-
-			Vertex vert = { rotatedPoint, glm::vec4(1), glm::vec4(0), glm::vec3(0) };
 			verts.push_back(vert);
 		}
 	}
@@ -90,7 +69,26 @@ std::vector<Vertex> generateSphereVerts(std::vector<Vertex> halfCircle, int numM
 #pragma endregion
 
 #pragma region 3.Function that generates indices for geometry to be rendered using triangle strips.
+std::vector<unsigned int> generateTriStripIndices(unsigned int numFaces, unsigned int numPoints)
+{
+	std::vector<unsigned int> indies;
 
+	for (int i = 0; i < numFaces - 1; i++)
+	{
+		unsigned int begin = i * numPoints;
+
+		for (int j = 0; j < numPoints; j++)
+		{
+			unsigned int bottomLeft = begin + j;
+			unsigned int bottomRight = bottomLeft + numPoints;
+			indies.push_back(bottomLeft);
+			indies.push_back(bottomRight);
+		}
+		indies.push_back(0xFFFF);
+	}
+
+	return indies;
+}
 #pragma endregion
 
 #pragma region 4.Ability to render a plane with predefined vertex information.
@@ -161,18 +159,11 @@ Mesh* generateCube(float scale)
 Mesh* generateSphere(float scale, int meridians)
 {
 	Mesh* sphere = new Mesh();
-	int halfCircPointCount = 10;
-	auto halfCirc = genHalfCircle(1, halfCircPointCount);
+	int halfCircPointCount = scale;	
+	auto halfCirc = genHalfCircle(10, halfCircPointCount);
 	auto sphereVerts = generateSphereVerts(halfCirc, meridians);
 
-	std::vector<unsigned int> sphereIndices;
-
-	for (int i = 0; i < sphereVerts.size(); i++)
-	{
-		sphereIndices.push_back(i);
-	}
-
-	sphere->initialize(sphereVerts, sphereIndices);
+	sphere->initialize(sphereVerts, generateTriStripIndices(meridians, halfCircPointCount));
 
 	return sphere;
 }
@@ -211,7 +202,7 @@ void RenderingGeometryApp::startup()
 
 	m_plane = generatePlane(100, 100);
 	m_cube = generateCube(10);
-	m_sphere = generateSphere(10, 360);
+	m_sphere = generateSphere(100, 360);
 
 	m_loadOBJ = new Mesh();
 	m_loadOBJ->loadOBJ("..//[bin]//objects//Tree", "Tree.obj");
@@ -293,11 +284,6 @@ void RenderingGeometryApp::update(float deltaTime)
 	if (glfwGetMouseButton(Application::_window, 1) == true) //MOUSE CLICKED
 	{
 		m_camera->setLookAt(m_camera->getWorldTransform()[3], glm::vec4(0), glm::vec3(0, 1, 0));
-	}
-
-	if (glfwGetKey(Application::_window, GLFW_KEY_ESCAPE))
-	{
-		Application::shutdown();
 	}
 
 	if (glfwGetKey(Application::_window, GLFW_KEY_W))
@@ -394,7 +380,7 @@ void RenderingGeometryApp::update(float deltaTime)
 		glm::vec4(1, 0, 0, 0),
 		glm::vec4(0, 1, 0, 0),
 		glm::vec4(0, 0, 1, 0),
-		glm::vec4(50, 20, 50, 1)
+		glm::vec4(50, 50, 50, 1)
 		);
 	sphereTransform = sphereTranslation;
 
@@ -431,7 +417,10 @@ void RenderingGeometryApp::draw()
 	m_defaultShader->bind();
 	auto sProjectionViewUniform = m_defaultShader->getUniform("worldViewProjection"); //GET HANDLE FOR THE UNIFORM MAT4 FOR THE WORLDVIEW MATRIX
 	glUniformMatrix4fv(sProjectionViewUniform, 1, GL_FALSE, glm::value_ptr(projView * sphereTransform)); // SEND THE SHADER PROGRAM A MODELVIEWPROJECTION MATRIX	
+	glPrimitiveRestartIndex(0xFFFF);
+	glEnable(GL_PRIMITIVE_RESTART);
 	m_sphere->draw(GL_TRIANGLE_STRIP);
+	glDisable(GL_PRIMITIVE_RESTART);
 	m_defaultShader->unbind();
 #pragma endregion
 
