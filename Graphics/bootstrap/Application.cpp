@@ -35,14 +35,14 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 
 		if (fullscreen == true) //FULLSCREEN CHECK
 		{
-			this->_window = glfwCreateWindow(width, height, title, _monitor, nullptr); //CREATE A WINDOW
+			this->_window = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), nullptr); //CREATE A WINDOW
 		}
 
 		if (fullscreen == false) //FULLSCREEN CHECK
 		{
 			this->_window = glfwCreateWindow(width, height, title, nullptr, nullptr); //CREATE A WINDOW
 		}
-		
+
 		if (this->_window == nullptr)
 		{
 			this->shutdown();
@@ -71,7 +71,7 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 		{
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //CLEAR THE WINDOW
 
-			currTime = glfwGetTime(); 
+			currTime = glfwGetTime();
 			deltaTime = currTime - prevTime; //DELTATIME CALCULATION
 
 			update(deltaTime); //CHILD CLASS METHOD IMPLEMENTATION

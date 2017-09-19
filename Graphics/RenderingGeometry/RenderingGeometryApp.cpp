@@ -46,7 +46,7 @@ std::vector<Vertex> generateSphereVerts(std::vector<Vertex> halfCircle, int numM
 	}
 
 	//ROTATE THE POINTS BY AN 'ANGLE' (numMeridians) TIMES ON THE XAXIS AND YAXIS
-	for (int i = 0; i < merdians; i++)
+	for (int i = 0; i < merdians + 1; i++)
 	{
 		auto slice = 360 / merdians;
 		auto angle = slice * i;
@@ -207,11 +207,11 @@ void RenderingGeometryApp::startup()
 	m_textureShader->attach();
 
 	m_texture = new Texture();
-	m_texture->load("..//[bin]//textures", "debugTexture.jpg");
+	m_texture->load("..//[bin]//textures", "hdFurTexture.jpg");
 
 	m_plane = generatePlane(100, 100);
 	m_cube = generateCube(10);
-	m_sphere = generateSphere(10, 3);
+	m_sphere = generateSphere(10, 360);
 
 	m_loadOBJ = new Mesh();
 	m_loadOBJ->loadOBJ("..//[bin]//objects//Tree", "Tree.obj");
@@ -293,6 +293,11 @@ void RenderingGeometryApp::update(float deltaTime)
 	if (glfwGetMouseButton(Application::_window, 1) == true) //MOUSE CLICKED
 	{
 		m_camera->setLookAt(m_camera->getWorldTransform()[3], glm::vec4(0), glm::vec3(0, 1, 0));
+	}
+
+	if (glfwGetKey(Application::_window, GLFW_KEY_ESCAPE))
+	{
+		Application::shutdown();
 	}
 
 	if (glfwGetKey(Application::_window, GLFW_KEY_W))
