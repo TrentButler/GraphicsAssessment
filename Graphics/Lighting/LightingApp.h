@@ -25,6 +25,7 @@ private:
 
 	Camera* m_camera;
 	Mesh* m_plane;
+	Mesh* m_sphere;
 	Mesh* m_loadOBJ;
 	Shader* m_shader;
 	Shader* m_lighting;
