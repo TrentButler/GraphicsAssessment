@@ -294,7 +294,8 @@ void LightingApp::update(float deltaTime)
 		glm::vec4(50, 50, 50, 1)
 	);
 	sphereTransform = sphereTranslation;
-}
+
+ }
 
 void LightingApp::draw()
 {
