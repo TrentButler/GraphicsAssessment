@@ -1,11 +1,11 @@
-#include <gl_core_4_4.h>
+#include "gl_core_4_4.h"
 #include "Texture.h"
 #include <windows.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include "stb_image.h"
 
 Texture::Texture() {};
 Texture::~Texture() {};

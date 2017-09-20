@@ -1,7 +1,7 @@
 #include "RenderingGeometryApp.h"
-#include "Shader.h"
-#include "Mesh.h"
-#include "Texture.h"
+#include <Shader.h>
+#include <Mesh.h>
+#include <Texture.h>
 #include <glfw3.h>
 #include <FlyCamera.h>
 #include <vector>

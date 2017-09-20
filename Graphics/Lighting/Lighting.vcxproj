@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3F169316-65B0-45CD-BE29-EC0AD431EAEB}</ProjectGuid>
-    <RootNamespace>RenderingGeometry</RootNamespace>
+    <ProjectGuid>{D010F6DE-3253-45E9-B77C-19D841B0C719}</ProjectGuid>
+    <RootNamespace>Lighting</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -116,11 +116,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LightingApp.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="RenderingGeometryApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RenderingGeometryApp.h" />
+    <ClInclude Include="LightingApp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
