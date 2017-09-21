@@ -1,5 +1,6 @@
 #pragma once
 #include <Application.h>
+#include <vector>
 
 struct Mesh;
 struct Shader;
@@ -12,7 +13,7 @@ public:
 
 	LightingApp();
 	~LightingApp();
-	
+
 	void startup();
 
 	void shutdown();
@@ -27,6 +28,15 @@ private:
 	Mesh* m_plane;
 	Mesh* m_sphere;
 	Mesh* m_loadOBJ;
+
+	std::vector<Mesh*> m_bunnies;
+
 	Shader* m_shader;
 	Shader* m_lighting;
+	Shader* m_ambient;
+	Shader* m_diffuse;
+	Shader* m_specular;
+	Shader* m_blinn;
+	Shader* m_phong;
+
 };

@@ -16,10 +16,10 @@ Mesh* generatePlane(int width, int height)
 {
 	Mesh* plane = new Mesh();
 
-	Vertex a = { glm::vec4(0, 0, 0, 1), glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //BOTTOM LEFT
-	Vertex b = { glm::vec4(width, 0, 0, 1), glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //BOTTOM RIGHT
-	Vertex c = { glm::vec4(width, 0, height, 1), glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //TOP RIGHT
-	Vertex d = { glm::vec4(0, 0, height, 1), glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), glm::vec4(0), glm::vec4(0) }; //TOP LEFT	
+	Vertex a = { glm::vec4(0, 0, 0, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0), glm::vec4(0) }; //BOTTOM LEFT
+	Vertex b = { glm::vec4(width, 0, 0, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0), glm::vec4(0) }; //BOTTOM RIGHT
+	Vertex c = { glm::vec4(width, 0, height, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0), glm::vec4(0) }; //TOP RIGHT
+	Vertex d = { glm::vec4(0, 0, height, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0), glm::vec4(0) }; //TOP LEFT	
 
 	std::vector<Vertex> verts = { a, b, c, d };
 	std::vector<unsigned int> indes = { 0, 1, 3, 3, 2, 1 };
@@ -77,9 +77,9 @@ Mesh* generateSphere(unsigned int segments, unsigned int rings,
 			indices[index++] = i * (segments + 1) + (j + 1);
 			indices[index++] = (i + 1) * (segments + 1) + j;
 		}
-	}	
-	
-	Mesh* sphere = new Mesh();	
+	}
+
+	Mesh* sphere = new Mesh();
 	std::vector<Vertex> verts;
 	std::vector<unsigned int> indes;
 	for (int i = 0; i < vertCount; i++)
@@ -141,6 +141,16 @@ Mesh* generateSphere(unsigned int segments, unsigned int rings,
 #pragma endregion
 
 
+
+/*
+Evidence that includes:
+Diffuse implementation
+Ambient implementation
+Specular implementation
+Understand difference between Blinn-Phong and Phong
+*/
+
+
 LightingApp::LightingApp() {}
 LightingApp::~LightingApp() {}
 
@@ -163,10 +173,16 @@ void LightingApp::startup()
 	m_plane = generatePlane(100, 100);
 
 	m_loadOBJ = new Mesh();
-	m_loadOBJ->loadOBJ("..//[bin]//objects//stanford", "Bunny.obj");
+	m_loadOBJ->loadOBJ("..//[bin]//objects//Tree", "Tree.obj");
+
+	for (int i = 0; i < 5; i++)
+	{
+		Mesh* bunny = new Mesh();
+		bunny->loadOBJ("..//[bin]//objects//stanford", "Bunny.obj");
+		m_bunnies.push_back(bunny);
+	}
 
 	unsigned int vao = 0, vbo = 0, ibo = 0, indexcount = 0;
-
 	m_sphere = generateSphere(100, 100, vao, vbo, ibo, indexcount);
 }
 
@@ -175,7 +191,14 @@ void LightingApp::shutdown()
 }
 
 glm::mat4 loadOBJTransform = glm::mat4(1);
+#pragma region BunnyTransforms
 glm::mat4 sphereTransform = glm::mat4(1);
+glm::mat4 bunny0Transform = glm::mat4(1);
+glm::mat4 bunny1Transform = glm::mat4(1);
+glm::mat4 bunny2Transform = glm::mat4(1);
+glm::mat4 bunny3Transform = glm::mat4(1);
+glm::mat4 bunny4Transform = glm::mat4(1);
+#pragma endregion
 void LightingApp::update(float deltaTime)
 {
 	//CAMERA STUFF	
@@ -283,7 +306,7 @@ void LightingApp::update(float deltaTime)
 		glm::vec4(1, 0, 0, 0),
 		glm::vec4(0, 1, 0, 0),
 		glm::vec4(0, 0, 1, 0),
-		glm::vec4(50, 0, 50, 1)
+		glm::vec4(90, 0, 90, 1)
 	);
 	loadOBJTransform = loadOBJTranslation;
 
@@ -293,9 +316,52 @@ void LightingApp::update(float deltaTime)
 		glm::vec4(0, 0, 1, 0),
 		glm::vec4(50, 50, 50, 1)
 	);
-	sphereTransform = sphereTranslation;
+	sphereTransform = sphereTranslation * glm::scale(glm::vec3(10));
 
- }
+#pragma region BunnyTranslations
+	float x = 10;
+	glm::mat4 bunnyTranslation = glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(0, 0, 1, 0),
+		glm::vec4(x, 0, 50, 1)
+	);	
+	bunny0Transform = bunnyTranslation;
+	x += 20;
+	bunnyTranslation = glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(0, 0, 1, 0),
+		glm::vec4(x, 0, 50, 1)
+	);
+	bunny1Transform = bunnyTranslation;
+	x += 20;
+	bunnyTranslation = glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(0, 0, 1, 0),
+		glm::vec4(x, 0, 50, 1)
+	);
+	bunny2Transform = bunnyTranslation;
+	x += 20;
+	bunnyTranslation = glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(0, 0, 1, 0),
+		glm::vec4(x, 0, 50, 1)
+	);
+	bunny3Transform = bunnyTranslation;
+	x += 20;
+	bunnyTranslation = glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(0, 0, 1, 0),
+		glm::vec4(x, 0, 50, 1)
+	);
+	bunny4Transform = bunnyTranslation;
+#pragma endregion
+
+}
 
 void LightingApp::draw()
 {
@@ -316,6 +382,22 @@ void LightingApp::draw()
 	m_shader->unbind();
 #pragma endregion
 
+#pragma region Sphere
+	m_lighting->bind();
+	lightingVPUniform = m_lighting->getUniform("WVP");
+	lightingDirUniform = m_lighting->getUniform("lightDirection");
+	lightingColorUniform = m_lighting->getUniform("lightColor");
+	lightingCameraUniform = m_lighting->getUniform("cameraPosition");
+	lightingSpecularUniform = m_lighting->getUniform("specularPower");
+	glUniform3fv(lightingDirUniform, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f))); // SEND THE LIGHTING SHADER THE LIGHTS DIRECTION
+	glUniform3fv(lightingColorUniform, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); // SEND THE LIGHTING SHADER THE LIGHTS COLOR
+	glUniform3fv(lightingCameraUniform, 1, glm::value_ptr(m_camera->getView()[3])); // SEND THE LIGHTING SHADER THE CAMERA'S POSITION
+	glUniform1f(lightingSpecularUniform, 128.0f); // SEND THE LIGHTING SHADER A VALUE FOR THE SPECULAR POWER
+	glUniformMatrix4fv(lightingVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * sphereTransform));
+	m_sphere->draw(GL_TRIANGLES);
+	m_lighting->unbind();
+#pragma endregion
+
 #pragma region LoadedObject
 	m_lighting->bind();
 	lightingVPUniform = m_lighting->getUniform("WVP");
@@ -332,19 +414,48 @@ void LightingApp::draw()
 	m_lighting->unbind();
 #pragma endregion
 
-#pragma region Sphere
-	m_lighting->bind();
-	lightingVPUniform = m_lighting->getUniform("WVP");
-	lightingDirUniform = m_lighting->getUniform("lightDirection");
-	lightingColorUniform = m_lighting->getUniform("lightColor");
-	lightingCameraUniform = m_lighting->getUniform("cameraPosition");
-	lightingSpecularUniform = m_lighting->getUniform("specularPower");
-	glUniform3fv(lightingDirUniform, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f))); // SEND THE LIGHTING SHADER THE LIGHTS DIRECTION
-	glUniform3fv(lightingColorUniform, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); // SEND THE LIGHTING SHADER THE LIGHTS COLOR
-	glUniform3fv(lightingCameraUniform, 1, glm::value_ptr(m_camera->getView()[3])); // SEND THE LIGHTING SHADER THE CAMERA'S POSITION
-	glUniform1f(lightingSpecularUniform, 128.0f); // SEND THE LIGHTING SHADER A VALUE FOR THE SPECULAR POWER
-	glUniformMatrix4fv(lightingVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * sphereTransform));
-	m_sphere->draw(GL_TRIANGLES);
-	m_lighting->unbind();
+#pragma region Bunny0 //AMBIENT LIGHTING
+	//unsigned int ambientVPUniform = m_ambient->getUniform("WVP");
+	m_shader->bind();
+	defaultVPUniform = m_shader->getUniform("WVP");
+	glUniformMatrix4fv(defaultVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny0Transform));
+	m_bunnies[0]->draw(GL_TRIANGLES);
+	m_shader->unbind();
+#pragma endregion
+
+#pragma region Bunny1 //DIFFUSE LIGHTING
+	//unsigned int diffuseVPUniform = m_ambient->getUniform("WVP");
+	m_shader->bind();
+	defaultVPUniform = m_shader->getUniform("WVP");
+	glUniformMatrix4fv(defaultVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny1Transform));
+	m_bunnies[1]->draw(GL_TRIANGLES);
+	m_shader->unbind();
+#pragma endregion
+
+#pragma region Bunny2 //SPECULAR LIGHTING
+	//unsigned int specularVPUniform = m_ambient->getUniform("WVP");
+	m_shader->bind();
+	defaultVPUniform = m_shader->getUniform("WVP");
+	glUniformMatrix4fv(defaultVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny2Transform));
+	m_bunnies[2]->draw(GL_TRIANGLES);
+	m_shader->unbind();
+#pragma endregion
+
+#pragma region Bunny3 //PHONG LIGHTING
+	//unsigned int phongVPUniform = m_ambient->getUniform("WVP");
+	m_shader->bind();
+	defaultVPUniform = m_shader->getUniform("WVP");
+	glUniformMatrix4fv(defaultVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny3Transform));
+	m_bunnies[3]->draw(GL_TRIANGLES);
+	m_shader->unbind();
+#pragma endregion
+
+#pragma region Bunny4 //BLINN-PHONG LIGHTING
+	//unsigned int blinnphongVPUniform = m_ambient->getUniform("WVP");
+	m_shader->bind();
+	defaultVPUniform = m_shader->getUniform("WVP");
+	glUniformMatrix4fv(defaultVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny4Transform));
+	m_bunnies[4]->draw(GL_TRIANGLES);
+	m_shader->unbind();
 #pragma endregion
 }
