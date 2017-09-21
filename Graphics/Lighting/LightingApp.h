@@ -32,7 +32,6 @@ private:
 	std::vector<Mesh*> m_bunnies;
 
 	Shader* m_shader;
-	Shader* m_lighting;
 	Shader* m_ambient;
 	Shader* m_diffuse;
 	Shader* m_specular;

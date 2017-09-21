@@ -449,7 +449,7 @@ void Mesh::loadOBJ(const char* path, const char* fileName)
 			texture = textures[i];
 		}
 
-		Vertex v = { vert, glm::vec4(1.0f, 0.0f, 1.0f, 1.0f), normal, texture };
+		Vertex v = { vert, glm::vec4(0.65f, 0.45f, 0.3f, 1.0f), normal, texture };
 		allVerts.push_back(v);
 	}
 
