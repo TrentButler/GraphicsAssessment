@@ -30,7 +30,6 @@ private:
 	Mesh* m_loadOBJ;
 
 	Mesh* m_bunny;
-	std::vector<Mesh*> m_bunnies;
 
 	Shader* m_shader;
 	Shader* m_ambient;

@@ -189,7 +189,7 @@ void LightingApp::startup()
 	m_loadOBJ->loadOBJ("..//[bin]//objects//Tree", "Tree.obj");
 
 	m_bunny = new Mesh();
-	m_bunny->loadOBJ("..//[bin]//objects//stanford", "Bunny.obj");
+	m_bunny->loadOBJ("..//[bin]//objects//stanford", "Bunny.obj"); //MAKE FIVE(5) COPIES OF THIS FOR THE DIFFERENT SHADERS
 
 	unsigned int vao = 0, vbo = 0, ibo = 0, indexcount = 0;
 	m_sphere = generateSphere(100, 100, vao, vbo, ibo, indexcount);
@@ -226,8 +226,11 @@ void LightingApp::update(float deltaTime)
 		//MOVE FOWARD (-Z)
 		//GET PREVIOUS POSITION, TRANSLATE, THEN SET IT
 		auto Previous = m_camera->getWorldTransform();
-		auto Translation = glm::mat4(glm::vec4(1, 0, 0, 0), glm::vec4(0, 1, 0, 0),
-			glm::vec4(0, 0, 1, 0), glm::vec4(0, 0, -100 * deltaTime, 1));
+		auto Translation = glm::mat4(
+			glm::vec4(1, 0, 0, 0), 
+			glm::vec4(0, 1, 0, 0),
+			glm::vec4(0, 0, 1, 0), 
+			glm::vec4(0, 0, -100 * deltaTime, 1));
 
 		//auto newPositon = (Previous * Translation)[3];
 		//this->_camera->setPosition(newPositon);

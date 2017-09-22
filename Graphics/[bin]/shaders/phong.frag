@@ -17,17 +17,20 @@ uniform vec3 groundColor;
 
 void main()
 {
-float vertNormDotUp = dot(vertexNormal.xyz, upVector);
+
+float vertNormDotUp = dot(normalize(vertexNormal.xyz), upVector);
 float influence = vertNormDotUp + (0.5f * 0.5f);
 vec3 hemisphereLighting = mix(groundColor, skyColor, influence);
 
 float diffuse = max(0, dot(normalize(vertexNormal.xyz), lightDirection));
+
 vec3 E = normalize(cameraPosition - vertexPosition.xyz);
 vec3 R = reflect(-lightDirection, vertexNormal.xyz);
 float specular = max(0, dot(E, R));
 specular = pow(specular, specularPower);
 
-vec3 lighting = vec3(lightColor * diffuse + lightColor * specular + vertexColor.xyz);
+vec3 Diffuse = lightColor * diffuse;
+vec3 Specular = lightColor * specular;
 
-fragColor = vec4(lighting, 1);
+fragColor = vec4(hemisphereLighting + Diffuse + Specular, 1);
 }
