@@ -161,6 +161,11 @@ void LightingApp::startup()
 	m_shader->attach();
 
 #pragma region BunnyShaders
+	m_ambient = new Shader();
+	m_ambient->load("ambient.vert", GL_VERTEX_SHADER);
+	m_ambient->load("ambient.frag", GL_FRAGMENT_SHADER);
+	m_ambient->attach();
+
 	m_diffuse = new Shader();
 	m_diffuse->load("diffuse.vert", GL_VERTEX_SHADER);
 	m_diffuse->load("diffuse.frag", GL_FRAGMENT_SHADER);
@@ -183,12 +188,8 @@ void LightingApp::startup()
 	m_loadOBJ = new Mesh();
 	m_loadOBJ->loadOBJ("..//[bin]//objects//Tree", "Tree.obj");
 
-	for (int i = 0; i < 5; i++)
-	{
-		Mesh* bunny = new Mesh();
-		bunny->loadOBJ("..//[bin]//objects//stanford", "Bunny.obj");
-		m_bunnies.push_back(bunny);
-	}
+	m_bunny = new Mesh();
+	m_bunny->loadOBJ("..//[bin]//objects//stanford", "Bunny.obj");
 
 	unsigned int vao = 0, vbo = 0, ibo = 0, indexcount = 0;
 	m_sphere = generateSphere(100, 100, vao, vbo, ibo, indexcount);
@@ -399,8 +400,9 @@ void LightingApp::draw()
 	unsigned int lightingVPUniform = 0;
 	glm::vec3 lightColor = glm::vec3(1);
 	glm::vec3 lightDirection = glm::vec3(0, 1, 0);
-
-	
+	glm::vec3 skyColor = glm::vec3(0, 0, 1);
+	glm::vec3 groundColor = glm::vec3(0, 1, 0);
+	glm::vec3 upVector = glm::vec3(0, 1, 0);
 
 #pragma region Plane
 	m_shader->bind();
@@ -443,12 +445,18 @@ void LightingApp::draw()
 #pragma endregion
 
 #pragma region Bunny0 //AMBIENT LIGHTING
-	//unsigned int ambientVPUniform = m_ambient->getUniform("WVP");
-	m_shader->bind();
-	defaultVPUniform = m_shader->getUniform("WVP"); //USE 'lightingVPUniform'
+	m_ambient->bind();
+	lightingVPUniform = m_ambient->getUniform("WVP"); //USE 'lightingVPUniform'
+	auto ambientUpVecUniform = m_ambient->getUniform("upVector");
+	auto ambientskyColorUniform = m_ambient->getUniform("skyColor");
+	auto ambientgroundColorUniform = m_ambient->getUniform("groundColor");
+
+	glUniform3fv(ambientUpVecUniform, 1, glm::value_ptr(upVector)); //SEND THE AMBIENT SHADER THE UP VECTOR
+	glUniform3fv(ambientskyColorUniform, 1, glm::value_ptr(skyColor)); //SEND THE AMBIENT SHADER THE SKY COLOR
+	glUniform3fv(ambientgroundColorUniform, 1, glm::value_ptr(groundColor)); //SEND THE AMBIENT SHADER THE GROUND COLOR
 	glUniformMatrix4fv(defaultVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny0Transform));
-	m_bunnies[0]->draw(GL_TRIANGLES);
-	m_shader->unbind();
+	m_bunny->draw(GL_TRIANGLES);
+	m_ambient->unbind();
 #pragma endregion
 
 #pragma region Bunny1 //DIFFUSE LIGHTING
@@ -460,7 +468,7 @@ void LightingApp::draw()
 	glUniform3fv(diffuseLightDirectionUniform, 1, glm::value_ptr(lightDirection)); //SEND THE DIFFUSE SHADER THE LIGHT'S DIRECTION
 	glUniform3fv(diffuseLightColorUniform, 1, glm::value_ptr(lightColor)); //SEND THE DIFFUSE SHADER THE LIGHT'S COLOR
 	glUniformMatrix4fv(lightingVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny1Transform));
-	m_bunnies[1]->draw(GL_TRIANGLES);
+	m_bunny->draw(GL_TRIANGLES);
 	m_diffuse->unbind();
 #pragma endregion
 
@@ -477,7 +485,7 @@ void LightingApp::draw()
 	glUniform3fv(specularCameraPosUniform, 1, glm::value_ptr(m_camera->getView()[3])); //SEND THE SPECULAR SHADER THE CAMERA'S POSITION
 	glUniform1f(specularPowerUniform, 128.0f); //SEND THE SPECULAR SHADER A VALUE FOR 'specularPower'
 	glUniformMatrix4fv(lightingVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny2Transform));
-	m_bunnies[2]->draw(GL_TRIANGLES);
+	m_bunny->draw(GL_TRIANGLES);
 	m_specular->unbind();
 #pragma endregion
 
@@ -494,7 +502,7 @@ void LightingApp::draw()
 	glUniform3fv(phongCameraPosUniform, 1, glm::value_ptr(m_camera->getView()[3])); // SEND THE PHONG SHADER THE CAMERA'S POSITION
 	glUniform1f(phongSpecularPowerUniform, 128.0f); // SEND THE PHONG SHADER A VALUE FOR THE SPECULAR POWER
 	glUniformMatrix4fv(lightingVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny3Transform));
-	m_bunnies[3]->draw(GL_TRIANGLES);
+	m_bunny->draw(GL_TRIANGLES);
 	m_phong->unbind();
 #pragma endregion
 
@@ -503,7 +511,7 @@ void LightingApp::draw()
 	m_shader->bind();
 	defaultVPUniform = m_shader->getUniform("WVP");
 	glUniformMatrix4fv(defaultVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny4Transform));
-	m_bunnies[4]->draw(GL_TRIANGLES);
+	m_bunny->draw(GL_TRIANGLES);
 	m_shader->unbind();
 #pragma endregion
 }
