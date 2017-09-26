@@ -180,6 +180,11 @@ void LightingApp::startup()
 	m_phong->load("phong.vert", GL_VERTEX_SHADER);
 	m_phong->load("phong.frag", GL_FRAGMENT_SHADER);
 	m_phong->attach();
+
+	m_blinn = new Shader();
+	m_blinn->load("blinnphong.vert", GL_VERTEX_SHADER);
+	m_blinn->load("blinnphong.frag", GL_FRAGMENT_SHADER);
+	m_blinn->attach();
 #pragma endregion
 
 	m_plane = generatePlane(100, 100);
@@ -308,39 +313,33 @@ void LightingApp::update(float deltaTime)
 		m_camera->setWorldTransform(newWorld);
 	}
 
-	if (glfwGetKey(Application::_window, GLFW_KEY_0))
-	{
-		m_camera->setLookAt(m_camera->getWorldTransform()[3], loadOBJTransform[3], glm::vec3(0, 1, 0));
-	}
-
 	if (glfwGetKey(Application::_window, GLFW_KEY_R))
 	{
-		//RELOAD THE SHADERS
-		m_shader = new Shader();
-		m_shader->load("basicShader.vert", GL_VERTEX_SHADER);
-		m_shader->load("basicShader.frag", GL_FRAGMENT_SHADER);
-		m_shader->attach();
-
-		m_ambient = new Shader();
+		system("cls");
 		m_ambient->load("ambient.vert", GL_VERTEX_SHADER);
 		m_ambient->load("ambient.frag", GL_FRAGMENT_SHADER);
 		m_ambient->attach();
 
-		m_diffuse = new Shader();
 		m_diffuse->load("diffuse.vert", GL_VERTEX_SHADER);
 		m_diffuse->load("diffuse.frag", GL_FRAGMENT_SHADER);
 		m_diffuse->attach();
 
-		m_specular = new Shader();
 		m_specular->load("specular.vert", GL_VERTEX_SHADER);
 		m_specular->load("specular.frag", GL_FRAGMENT_SHADER);
 		m_specular->attach();
 
-		m_phong = new Shader();
 		m_phong->load("phong.vert", GL_VERTEX_SHADER);
 		m_phong->load("phong.frag", GL_FRAGMENT_SHADER);
 		m_phong->attach();
 
+		m_blinn->load("blinnphong.vert", GL_VERTEX_SHADER);
+		m_blinn->load("blinnphong.frag", GL_FRAGMENT_SHADER);
+		m_blinn->attach();
+	}
+
+	if (glfwGetKey(Application::_window, GLFW_KEY_0))
+	{
+		m_camera->setLookAt(m_camera->getWorldTransform()[3], loadOBJTransform[3], glm::vec3(0, 1, 0));
 	}
 
 	if (glfwGetKey(Application::_window, GLFW_KEY_KP_0))
@@ -467,8 +466,8 @@ void LightingApp::draw()
 	auto loadObjectColorUniform = m_phong->getUniform("lightColor");
 	auto loadObjectCameraUniform = m_phong->getUniform("cameraPosition");
 	auto loadObjectSpecularPowerUniform = m_phong->getUniform("specularPower");
-	glUniform3fv(loadObjectLightDirectionUniform, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f))); // SEND THE PHONG SHADER THE LIGHTS DIRECTION
-	glUniform3fv(loadObjectColorUniform, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); // SEND THE PHONG SHADER THE LIGHTS COLOR
+	glUniform3fv(loadObjectLightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION
+	glUniform3fv(loadObjectColorUniform, 1, glm::value_ptr(glm::vec3(lightColor))); // SEND THE PHONG SHADER THE LIGHTS COLOR
 	glUniform3fv(loadObjectCameraUniform, 1, glm::value_ptr(m_camera->getView()[3])); // SEND THE PHONG SHADER THE CAMERA'S POSITION
 	glUniform1f(loadObjectSpecularPowerUniform, 128.0f); // SEND THE PHONG SHADER A VALUE FOR THE SPECULAR POWER
 	glUniformMatrix4fv(lightingVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * loadOBJTransform));
@@ -548,11 +547,28 @@ void LightingApp::draw()
 #pragma endregion
 
 #pragma region Bunny4 //BLINN-PHONG LIGHTING
-	//unsigned int blinnphongVPUniform = m_ambient->getUniform("WVP");
-	m_shader->bind();
-	defaultVPUniform = m_shader->getUniform("WVP");
-	glUniformMatrix4fv(defaultVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny4Transform));
+	m_blinn->bind();
+	lightingVPUniform = m_blinn->getUniform("WVP");
+
+	auto blinnUpVecUniform = m_blinn->getUniform("upVector");
+	auto blinnskyColorUniform = m_blinn->getUniform("skyColor");
+	auto blinngroundColorUniform = m_blinn->getUniform("groundColor");
+
+	auto blinnLightDirectionUniform = m_blinn->getUniform("lightDirection");
+	auto blinnLightColorUniform = m_blinn->getUniform("lightColor");
+	auto blinnCameraPosUniform = m_blinn->getUniform("cameraPosition");
+	auto blinnSpecularPowerUniform = m_blinn->getUniform("specularPower");
+
+	glUniform3fv(blinnUpVecUniform, 1, glm::value_ptr(upVector)); //SEND THE PHONG SHADER THE UP VECTOR
+	glUniform3fv(blinnskyColorUniform, 1, glm::value_ptr(skyColor)); //SEND THE PHONG SHADER THE SKY COLOR
+	glUniform3fv(blinngroundColorUniform, 1, glm::value_ptr(groundColor)); //SEND THE PHONG SHADER THE GROUND COLOR
+
+	glUniform3fv(blinnLightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION
+	glUniform3fv(blinnLightColorUniform, 1, glm::value_ptr(lightColor)); // SEND THE PHONG SHADER THE LIGHTS COLOR
+	glUniform3fv(blinnCameraPosUniform, 1, glm::value_ptr(m_camera->getView()[3])); // SEND THE PHONG SHADER THE CAMERA'S POSITION
+	glUniform1f(blinnSpecularPowerUniform, 128.0f); // SEND THE PHONG SHADER A VALUE FOR THE SPECULAR POWER
+	glUniformMatrix4fv(lightingVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * bunny4Transform));
 	m_bunny->draw(GL_TRIANGLES);
-	m_shader->unbind();
+	m_blinn->unbind();
 #pragma endregion
 }
