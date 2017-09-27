@@ -1,10 +1,10 @@
 #version 410
-in vec2 vertexTextureCoord;
+in vec3 vertexTextureCoord;
 in vec4 vertexColor;
 out vec4 fragColor;
-uniform sampler2D diffuse;
+uniform sampler2D vertexTexture;
 void main()
 {
-vec4 vTexture = texture(diffuse, vertexTextureCoord);
-fragColor = max(vec4(0), vTexture);
+vec4 vTexture = texture(vertexTexture, vertexTextureCoord.xy);
+fragColor = vTexture;
 }
