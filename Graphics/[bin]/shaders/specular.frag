@@ -18,7 +18,7 @@ vec3 R = reflect(-lightDirection, vertexNormal.xyz);
 float specular = max(0, dot(E, R));
 specular = pow(specular, specularPower);
 
-vec3 lighting = vec3(lightColor * specular + vertexColor.xyz);
+vec3 lighting = vec3(lightColor * specular);
 
 fragColor = vec4(lighting, 1);
 }

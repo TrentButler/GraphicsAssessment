@@ -450,8 +450,17 @@ void LightingApp::draw()
 	auto lightingColorUniform = m_phong->getUniform("lightColor");
 	auto lightingCameraUniform = m_phong->getUniform("cameraPosition");
 	auto lightingSpecularUniform = m_phong->getUniform("specularPower");
-	glUniform3fv(lightingDirUniform, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f))); // SEND THE LIGHTING SHADER THE LIGHTS DIRECTION
-	glUniform3fv(lightingColorUniform, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); // SEND THE LIGHTING SHADER THE LIGHTS COLOR
+
+	auto sphereUpVecUniform = m_phong->getUniform("upVector");
+	auto sphereskyColorUniform = m_phong->getUniform("skyColor");
+	auto spheregroundColorUniform = m_phong->getUniform("groundColor");
+
+	glUniform3fv(sphereUpVecUniform, 1, glm::value_ptr(upVector)); //SEND THE PHONG SHADER THE UP VECTOR
+	glUniform3fv(sphereskyColorUniform, 1, glm::value_ptr(skyColor)); //SEND THE PHONG SHADER THE SKY COLOR
+	glUniform3fv(spheregroundColorUniform, 1, glm::value_ptr(groundColor)); //SEND THE PHONG SHADER THE GROUND COLOR
+
+	glUniform3fv(lightingDirUniform, 1, glm::value_ptr(lightDirection)); // SEND THE LIGHTING SHADER THE LIGHTS DIRECTION
+	glUniform3fv(lightingColorUniform, 1, glm::value_ptr(lightColor)); // SEND THE LIGHTING SHADER THE LIGHTS COLOR
 	glUniform3fv(lightingCameraUniform, 1, glm::value_ptr(m_camera->getView()[3])); // SEND THE LIGHTING SHADER THE CAMERA'S POSITION
 	glUniform1f(lightingSpecularUniform, 128.0f); // SEND THE LIGHTING SHADER A VALUE FOR THE SPECULAR POWER
 	glUniformMatrix4fv(lightingVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * sphereTransform));
