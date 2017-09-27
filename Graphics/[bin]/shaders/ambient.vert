@@ -11,7 +11,7 @@ out vec3 vertexTextureCoord;
 
 uniform mat4 WVP; //UNIFORM VARIABLE FOR THE 'WORLD VIEW PROJECTION' MATRIX
 
-void main(
+void main()
 {
 vertexPosition = Position; //SEND THE VERTEX INFORMATION DOWN THE PIPELINE
 vertexColor = Color; //SEND THE VERTEX INFORMATION DOWN THE PIPELINE
