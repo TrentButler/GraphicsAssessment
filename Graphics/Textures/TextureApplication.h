@@ -27,7 +27,14 @@ public:
 private:
 	Camera* m_camera;
 	Mesh* m_plane;
+	Mesh* m_sphere;
 	Shader* m_shader;
+	Shader* m_multTexShader;
+
 	Texture* m_texture;
+	Texture* m_planeTexture;
+
+	Texture* m_normalMap;
+	Texture* m_diffuseMap;
 
 };

@@ -10,7 +10,7 @@
 Texture::Texture() {};
 Texture::~Texture() {};
 
-void Texture::load(const char* path, const char* name) 
+void Texture::load2D(const char* path, const char* name) 
 {
 	char prevDir[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, prevDir);
@@ -33,8 +33,13 @@ void Texture::load(const char* path, const char* name)
 	stbi_image_free(imageData);
 }
 
-void Texture::bind() 
+void Texture::loadCubeMap(const char* path, const char* name)
 {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
+
+}
+
+void Texture::bind(unsigned int activeTexture, unsigned int textureType) 
+{
+	glActiveTexture(activeTexture);
+	glBindTexture(textureType, m_texture);
 }
