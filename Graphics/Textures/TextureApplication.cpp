@@ -36,7 +36,7 @@ void TextureApplication::startup()
 	m_camera->setLookAt(glm::vec3(-20.1f, 50.0f, -100.1f), glm::vec3(0), glm::vec3(0, 1, 0));
 	m_camera->setPerspective(glm::pi<float>() / 4, (float)_width / (float)_height, 0.1f, 10000.0f);
 	
-	m_plane = generatePlane(10, 10);
+	m_plane = generatePlane(100, 100);
 
 	m_shader = new Shader();
 	m_shader->load("textureShader.vert", GL_VERTEX_SHADER);
@@ -44,7 +44,7 @@ void TextureApplication::startup()
 	m_shader->attach();
 
 	m_texture = new Texture();
-	m_texture->load("..//[bin]//textures", "jadeTexture.jpg");
+	m_texture->load("..//[bin]//textures", "leatherTexture.jpg");
 }
 
 void TextureApplication::shutdown()

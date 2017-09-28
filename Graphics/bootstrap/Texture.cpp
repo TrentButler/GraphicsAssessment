@@ -18,7 +18,7 @@ void Texture::load(const char* path, const char* name)
 
 	int imageWidth = 0, imageHeight = 0, imageFormat = 0;
 
-	unsigned char* imageData = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_rgb); //LOAD IMAGE
+	unsigned char* imageData = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_default); //LOAD IMAGE
 	SetCurrentDirectory(prevDir); //RETURN TO ORIGINAL WORKING DIRECTORY
 
 	//GENERATE A OPENGL TEXTURE OBJECT, USE 'm_texture' AS THE HANDLE
