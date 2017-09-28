@@ -16,6 +16,7 @@ protected:
 	virtual void shutdown() = 0;
 	virtual void update(float time) = 0;
 	virtual void draw() = 0;
+	virtual void OnGUI() = 0;
 
 	unsigned int _width;
 	unsigned int _height;

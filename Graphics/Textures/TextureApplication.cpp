@@ -6,6 +6,9 @@
 #include <glfw3.h>
 #include <gtc/constants.hpp>
 #include <ext.hpp>
+#include <imgui.h>
+#include <imgui_impl_glfw_gl3.h>
+#include <iostream>
 
 #pragma region 4.Ability to render a plane with predefined vertex information.
 Mesh* generatePlane(int width, int height)
@@ -176,4 +179,25 @@ void TextureApplication::draw()
 	
 	m_plane->draw(GL_TRIANGLES);
 	m_shader->unbind();
+}
+
+void TextureApplication::OnGUI()
+{
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("FILE"))
+		{
+			if (ImGui::MenuItem("NEW GEOMETRY")) {}
+			if (ImGui::MenuItem("NEW VERTEX SHADER")) {}
+			if (ImGui::MenuItem("NEW FRAGMENT SHADER")) {}
+			ImGui::EndMenu(); //END THE MENU
+		}
+
+		if (ImGui::BeginMenu("EDIT"))
+		{
+
+			ImGui::EndMenu(); //END THE MENU
+		}
+		ImGui::EndMainMenuBar(); //END THE MAIN MENU BAR
+	}
 }
