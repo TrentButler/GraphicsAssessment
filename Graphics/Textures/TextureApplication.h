@@ -20,9 +20,14 @@ public:
 	void draw();
 
 
+	// Inherited via Application
+	virtual void OnGUI() override;
+
+
 private:
 	Camera* m_camera;
 	Mesh* m_plane;
 	Shader* m_shader;
 	Texture* m_texture;
+
 };

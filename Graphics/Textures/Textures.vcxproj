@@ -122,6 +122,11 @@
   <ItemGroup>
     <ClInclude Include="TextureApplication.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\bootstrap\bootstrap.vcxproj">
+      <Project>{e3c63da5-8757-418c-aaf5-a46fb1999f7c}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

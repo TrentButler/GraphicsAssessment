@@ -6,31 +6,6 @@
 Application::Application() {};
 Application::~Application() {};
 
-void Application::startup() 
-{
-	ImGui_ImplGlfwGL3_Init(this->_window, true);
-	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontDefault();
-
-	io.DisplaySize.x = this->_width;
-	io.DisplaySize.y = this->_height;
-	io.RenderDrawListsFn(NULL);
-}
-
-void Application::shutdown() 
-{
-	shutdown(); //CHILD CLASS METHOD IMPLEMENTATION
-	glfwDestroyWindow(this->_window);
-	glfwTerminate();
-}
-
-
-void Application::update(float time) {};
-
-
-void Application::draw() {};
-
-
 void Application::run(const char* title, unsigned int width, unsigned int height, bool fullscreen)
 {
 	if (glfwInit() == false) //INITILIZE DEPENDENCY 'glfw3', IF INITIALIZATION IS UNSUCCESSFUL TERMINATE PROGRAM
@@ -69,7 +44,12 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f); //SET A CLEAR COLOR FOR THE BACKGROUND
 
-		this->startup();
+		ImGui_ImplGlfwGL3_Init(this->_window, true);
+		ImGuiIO& io = ImGui::GetIO();
+
+		io.DisplaySize.x = this->_width;
+		io.DisplaySize.y = this->_height;		
+
 		startup(); //CHILD CLASS METHOD IMPLEMENTATION
 
 		float deltaTime = 0; //USED TO CALCULATE DELTATIME
@@ -80,22 +60,24 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 
 		while (glfwWindowShouldClose(this->_window) == GL_FALSE) //LOOP UNTIL 'glfwWindowShouldClose() == GL_TRUE'
 		{
-			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //CLEAR THE WINDOW
-			ImGui::NewFrame();
+			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //CLEAR THE WINDOW			
 
 			currTime = glfwGetTime();
 			deltaTime = currTime - prevTime; //DELTATIME CALCULATION
+			prevTime = currTime;
+
+			glfwPollEvents(); //CHECK FOR ANY EVENTS
+			ImGui_ImplGlfwGL3_NewFrame();
 
 			update(deltaTime); //CHILD CLASS METHOD IMPLEMENTATION
 			draw(); //CHILD CLASS METHOD IMPLEMENTATION
-			ImGui::Render(); //RENDER THE UI
-			ImGui::GetDrawData();
+			OnGUI();
 
-			prevTime = currTime;
+			ImGui::Render(); //RENDER THE UI
+
 			glfwSwapBuffers(this->_window); //SWAP THE FRONT AND BACK BUFFERS
-			glfwPollEvents(); //CHECK FOR ANY EVENTS
 		}
 
-		this->shutdown(); //APPLICATION SPECIFIC SHUTDOWN METHOD, TERMINATE THE PROGRAM
+		shutdown(); //TERMINATE THE PROGRAM
 	}
 }
