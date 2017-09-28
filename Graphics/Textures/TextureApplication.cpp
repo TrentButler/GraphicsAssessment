@@ -44,7 +44,7 @@ void TextureApplication::startup()
 	m_shader->attach();
 
 	m_texture = new Texture();
-	m_texture->load("..//[bin]//textures", "crate.png");	
+	m_texture->load("..//[bin]//textures", "jadeTexture.jpg");
 }
 
 void TextureApplication::shutdown()
