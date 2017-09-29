@@ -142,11 +142,12 @@ Mesh* generateSphere(unsigned int segments, unsigned int rings,
 
 TextureApplication::TextureApplication() {};
 TextureApplication::~TextureApplication() {};
-
+float runningTime = 0;
 
 void TextureApplication::startup()
 {
 	m_camera = new FlyCamera();
+	//m_camera->setLookAt(glm::vec3(-20.1f, 50.0f, -100.1f), glm::vec3(0), glm::vec3(0, 1, 0));
 	m_camera->setLookAt(glm::vec3(-20.1f, 50.0f, -100.1f), glm::vec3(0), glm::vec3(0, 1, 0));
 	m_camera->setPerspective(glm::pi<float>() / 4, (float)_width / (float)_height, 0.1f, 10000.0f);
 	
@@ -166,11 +167,10 @@ void TextureApplication::startup()
 	m_planeTexture->load2D("..//[bin]//textures", "debugTexture.jpg");*/
 
 	m_diffuseMap = new Texture();
-	m_diffuseMap->load2D("..//[bin]//textures//diffuse", "176.JPG");
+	m_diffuseMap->load2D("..//[bin]//textures//diffuse", "starfieldDiffuseMap.jpg");
 	
 	m_normalMap = new Texture();
-	m_normalMap->load2D("..//[bin]//textures//normal", "176_norm.JPG");
-
+	m_normalMap->load2D("..//[bin]//textures//normal", "151_norm.JPG");
 }
 
 void TextureApplication::shutdown()
@@ -179,8 +179,11 @@ void TextureApplication::shutdown()
 
 glm::mat4 sphereTransform = glm::mat4(1);
 glm::mat4 planeTransform = glm::mat4(1);
+glm::vec2 deltaUV = glm::vec2(0);
 void TextureApplication::update(float deltaTime)
 {
+	runningTime += deltaTime;
+
 	sphereTransform = glm::scale(glm::vec3(1000));	
 	//CAMERA STUFF	
 	if (glfwGetMouseButton(Application::_window, 0) == true) //LOOK AT CENTER (0,0,0)
@@ -288,6 +291,12 @@ void TextureApplication::update(float deltaTime)
 	{
 		m_camera->setLookAt(m_camera->getWorldTransform()[3], planeTransform[3], glm::vec3(0, 1, 0));
 	}
+
+	if (glfwGetKey(Application::_window, GLFW_KEY_KP_0))
+	{
+		m_camera->setLookAt(m_camera->getWorldTransform()[3], sphereTransform[3], glm::vec3(0, 1, 0));
+	}
+
 }
 
 void TextureApplication::draw()
@@ -317,13 +326,15 @@ void TextureApplication::draw()
 	auto vertexDiffMapUniform = m_multTexShader->getUniform("diffuseMap");
 	auto vertexNormMapUniform = m_multTexShader->getUniform("normalMap");
 
-	glUniform3fv(lightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION
-	
+	auto timeUniform = m_multTexShader->getUniform("time");
+
+	glUniform3fv(lightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION	
 	glUniform1i(vertexDiffMapUniform, 0); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
 	glUniform1i(vertexNormMapUniform, 1); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
+	glUniform1f(timeUniform, runningTime); //SEND THE FRAGMENT SHADER 'DELTATIME'
 
-	glUniformMatrix4fv(textureVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * planeTransform));
-	m_plane->draw(GL_TRIANGLES);
+	glUniformMatrix4fv(textureVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * sphereTransform));
+	m_sphere->draw(GL_TRIANGLES);
 	m_multTexShader->unbind();
 }
 

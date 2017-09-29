@@ -12,13 +12,16 @@ out vec3 vertexTextureCoord;
 out vec3 vertexTangent;
 out vec3 vertexBiTangent;
 
+uniform mat4 ModelMatrix;
+uniform mat4 NormalMatrix;
+
 uniform mat4 WVP;
 
 void main()
 {
-vertexPosition = Position;
+vertexPosition = ModelMatrix * Position;
 vertexColor = Color;
-vertexNormal = Normal;
+vertexNormal = NormalMatrix * Normal;
 vertexTextureCoord = TextureCoord;
 vertexTangent = Tangent.xyz;
 vertexBiTangent = cross(vertexNormal.xyz, vertexTangent);

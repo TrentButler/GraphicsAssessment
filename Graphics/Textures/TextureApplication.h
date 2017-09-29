@@ -30,6 +30,7 @@ private:
 	Mesh* m_sphere;
 	Shader* m_shader;
 	Shader* m_multTexShader;
+	Shader* m_multTexShaderSurface;
 
 	Texture* m_texture;
 	Texture* m_planeTexture;

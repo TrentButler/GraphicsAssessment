@@ -11,6 +11,7 @@ uniform vec3 lightDirection;
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 
+uniform float time;
 out vec4 fragColor;
 
 void main()
@@ -22,13 +23,23 @@ mat3 TBN = mat3(
     normalize(vertexNormal)
     );
 
-vec3 getNormalMapTextureRGB = texture(normalMap, vertexTextureCoord.xy).xyz;
-vec3 convertedNormalMapTextureRGB = getNormalMapTextureRGB * 2 - 1;
-vec3 textureSurfaceNormal = TBN * convertedNormalMapTextureRGB;
+vec2 UV = vertexTextureCoord.xy;
 
-float diffuse = max(0, dot(normalize(textureSurfaceNormal), normalize(lightDirection))); //DIFFUSE CALCULATION
+UV.y -= time * 0.05;
 
-vec3 getDiffuseMapTextureRGB = texture(diffuseMap, vertexTextureCoord.xy).xyz;
+vec3 normalTexture = texture(normalMap, UV.xy).xyz;
 
-fragColor = vec4(getDiffuseMapTextureRGB * diffuse, 1);
+vec3 convertedNormalMapTextureRGB = normalTexture * 2 - 1;
+
+vec3 N = normalize(TBN * convertedNormalMapTextureRGB);
+vec3 L = normalize(lightDirection);
+vec3 SN = normalize(vertexNormal.xyz);
+float diffuseTerm = max(0, dot(N, -L)); //DIFFUSE CALCULATION
+
+vec3 diffuseLighting = vec3(0.2) * diffuseTerm;
+
+vec3 diffuseTexture = texture(diffuseMap, UV.xy).xyz;
+
+fragColor = vec4(diffuseTexture + diffuseLighting, 1);
+
 }
