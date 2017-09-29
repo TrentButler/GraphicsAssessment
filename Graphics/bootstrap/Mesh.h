@@ -9,6 +9,7 @@ struct Vertex
 	glm::vec4 color;
 	glm::vec4 normal;
 	glm::vec3 texture;
+	glm::vec4 tangent;
 };
 class Mesh
 {

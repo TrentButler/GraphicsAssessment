@@ -15,10 +15,10 @@ Mesh* generatePlane(int width, int height)
 {
 	Mesh* plane = new Mesh();
 
-	Vertex a = { glm::vec4(0, 0, 0, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0), glm::vec3(0, 0, 0) }; //BOTTOM LEFT
-	Vertex b = { glm::vec4(width, 0, 0, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0), glm::vec3(1, 0, 0) }; //BOTTOM RIGHT
-	Vertex c = { glm::vec4(width, 0, height, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0), glm::vec3(1, 1, 0) }; //TOP RIGHT
-	Vertex d = { glm::vec4(0, 0, height, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0), glm::vec3(0, 1, 0) }; //TOP LEFT
+	Vertex a = { glm::vec4(0, 0, 0, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0, 1, 0, 1), glm::vec3(0, 0, 0), glm::vec4(1,0,0,0) }; //BOTTOM LEFT
+	Vertex b = { glm::vec4(width, 0, 0, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0, 1, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1,0,0,0) }; //BOTTOM RIGHT
+	Vertex c = { glm::vec4(width, 0, height, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0, 1, 0, 1), glm::vec3(1, 1, 0), glm::vec4(1,0,0,0) }; //TOP RIGHT
+	Vertex d = { glm::vec4(0, 0, height, 1), glm::vec4(0.0f, 0.5f, 0.2f, 1.0f), glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1,0,0,0) }; //TOP LEFT
 
 	std::vector<Vertex> verts = { a, b, c, d };
 	std::vector<unsigned int> indes = { 0, 1, 3, 3, 2, 1 }; //look here
@@ -56,7 +56,7 @@ Mesh* generateSphere(unsigned int segments, unsigned int rings,
 			vertex->position = glm::vec4(x0 * 0.5f, y0 * 0.5f, z0 * 0.5f, 1);
 			vertex->normal = glm::vec4(x0, y0, z0, 0);
 
-			//vertex->tangent = glm::vec4(glm::sin(segment * segmentAngle + glm::half_pi<float>()), 0, glm::cos(segment * segmentAngle + glm::half_pi<float>()), 0);
+			vertex->tangent = glm::vec4(glm::sin(segment * segmentAngle + glm::half_pi<float>()), 0, glm::cos(segment * segmentAngle + glm::half_pi<float>()), 0);
 
 			//// not a part of the AIEVertex, but this is how w generate bitangents
 			//vertex->bitangent = glm::vec4(glm::cross(glm::vec3(vertex->normal), glm::vec3(vertex->tangent)), 0);
@@ -166,10 +166,10 @@ void TextureApplication::startup()
 	m_planeTexture->load2D("..//[bin]//textures", "debugTexture.jpg");*/
 
 	m_diffuseMap = new Texture();
-	m_diffuseMap->load2D("..//[bin]//textures", "crate.png");
+	m_diffuseMap->load2D("..//[bin]//textures//diffuse", "176.JPG");
 	
 	m_normalMap = new Texture();
-	m_normalMap->load2D("..//[bin]//textures", "debugTexture.jpg");
+	m_normalMap->load2D("..//[bin]//textures//normal", "176_norm.JPG");
 
 }
 
@@ -279,9 +279,9 @@ void TextureApplication::update(float deltaTime)
 	if (glfwGetKey(Application::_window, GLFW_KEY_R))
 	{
 		system("cls");
-		m_shader->load("textureShader.vert", GL_VERTEX_SHADER);
-		m_shader->load("textureShader.frag", GL_FRAGMENT_SHADER);
-		m_shader->attach();
+		m_multTexShader->load("multiTextureShader.vert", GL_VERTEX_SHADER);
+		m_multTexShader->load("multiTextureShader.frag", GL_FRAGMENT_SHADER);
+		m_multTexShader->attach();
 	}
 
 	if (glfwGetKey(Application::_window, GLFW_KEY_0))
@@ -293,8 +293,11 @@ void TextureApplication::update(float deltaTime)
 void TextureApplication::draw()
 {
 	auto viewProjection = m_camera->getProjectionView();
-	//auto textureVPUniform = m_multTexShader->getUniform("WVP");
-	//auto vertexTextureUniform = m_multTexShader->getUniform("vertexTexture");
+	glm::vec3 lightColor = glm::vec3(1, 1, 0);
+	glm::vec3 lightDirection = glm::vec3(0, 1, 0);
+	glm::vec3 skyColor = glm::vec3(1);
+	glm::vec3 groundColor = glm::vec3(0);
+	glm::vec3 upVector = glm::vec3(0, 1, 0);
 
 	/*m_shader->bind();
 	m_texture->bind(GL_TEXTURE0, GL_TEXTURE_2D);	
@@ -308,15 +311,20 @@ void TextureApplication::draw()
 	m_normalMap->bind(GL_TEXTURE1, GL_TEXTURE_2D);
 
 	auto textureVPUniform = m_multTexShader->getUniform("WVP");
-	auto vertexDiffMapUniform = m_multTexShader->getUniform("vertexTexture1");
-	auto vertexNormMapUniform = m_multTexShader->getUniform("vertexTexture2");
 
-	glUniform1i(vertexDiffMapUniform, 0);
-	glUniform1i(vertexNormMapUniform, 1);
+	auto lightDirectionUniform = m_multTexShader->getUniform("lightDirection");
+
+	auto vertexDiffMapUniform = m_multTexShader->getUniform("diffuseMap");
+	auto vertexNormMapUniform = m_multTexShader->getUniform("normalMap");
+
+	glUniform3fv(lightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION
+	
+	glUniform1i(vertexDiffMapUniform, 0); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
+	glUniform1i(vertexNormMapUniform, 1); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
+
 	glUniformMatrix4fv(textureVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * planeTransform));
 	m_plane->draw(GL_TRIANGLES);
 	m_multTexShader->unbind();
-
 }
 
 void TextureApplication::OnGUI()
