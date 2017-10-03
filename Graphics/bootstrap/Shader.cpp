@@ -56,6 +56,8 @@ void Shader::load(const char * filename, unsigned int type)
 			glGetShaderiv(m_vertexShader, GL_INFO_LOG_LENGTH, &logLength);
 			char* infoLog = new char[logLength];
 			glGetShaderInfoLog(m_vertexShader, logLength, 0, infoLog);
+			printf(filename);
+			printf("\n");
 			printf("VERTEX SHADER COMPILE ERROR\n");
 			printf("%s\n", infoLog);
 			delete[] infoLog;
@@ -83,6 +85,8 @@ void Shader::load(const char * filename, unsigned int type)
 			glGetShaderiv(m_fragmentShader, GL_INFO_LOG_LENGTH, &logLength);
 			char* infoLog = new char[logLength];
 			glGetShaderInfoLog(m_fragmentShader, logLength, 0, infoLog);
+			printf(filename);
+			printf("\n");
 			printf("FRAGMENT SHADER COMPILE ERROR\n");
 			printf("%s\n", infoLog);
 			delete[] infoLog;

@@ -23,11 +23,7 @@ mat3 TBN = mat3(
     normalize(vertexNormal)
     );
 
-vec2 UV = vertexTextureCoord.xy;
-
-UV.y -= time * 0.05;
-
-vec3 normalTexture = texture(normalMap, UV.xy).xyz;
+vec3 normalTexture = texture(normalMap, vertexTextureCoord.xy).xyz;
 
 vec3 convertedNormalMapTextureRGB = normalTexture * 2 - 1;
 
@@ -38,8 +34,7 @@ float diffuseTerm = max(0, dot(N, -L)); //DIFFUSE CALCULATION
 
 vec3 diffuseLighting = vec3(0.2) * diffuseTerm;
 
-vec3 diffuseTexture = texture(diffuseMap, UV.xy).xyz;
+vec3 diffuseTexture = texture(diffuseMap, vertexTextureCoord.xy).xyz;
 
 fragColor = vec4(diffuseTexture + diffuseLighting, 1);
-
 }

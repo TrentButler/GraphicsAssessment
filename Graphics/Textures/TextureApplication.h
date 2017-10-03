@@ -24,18 +24,19 @@ public:
 	virtual void OnGUI() override;
 
 
-private:
+private:	
 	Camera* m_camera;
 	Mesh* m_plane;
 	Mesh* m_sphere;
+	Mesh* m_perlinMesh;
+
 	Shader* m_shader;
 	Shader* m_multTexShader;
-	Shader* m_multTexShaderSurface;
+	Shader* m_perlinShader;
 
-	Texture* m_texture;
-	Texture* m_planeTexture;
-
-	Texture* m_normalMap;
+	
 	Texture* m_diffuseMap;
-
+	Texture* m_normalMap;
+	Texture* m_animatedTexture;
+	Texture* m_perlinTexture;
 };

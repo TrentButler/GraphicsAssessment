@@ -1,10 +1,24 @@
 #version 410
-in vec3 vertexTextureCoord;
-in vec4 vertexColor;
+in vec4 vertexPosition; //VERTEX INFORMATION
+in vec4 vertexColor; //VERTEX INFORMATION
+in vec4 vertexNormal; //VERTEX INFORMATION
+in vec3 vertexTextureCoord; //VERTEX INFORMATION
+in vec3 vertexTangent;
+in vec3 vertexBiTangent;
+
+uniform sampler2D diffuseMap;
+
+uniform float time;
+
 out vec4 fragColor;
-uniform sampler2D vertexTexture;
+
 void main()
 {
-vec4 vTexture = texture(vertexTexture, vertexTextureCoord.xy);
-fragColor = vTexture;
+vec2 UV = vertexTextureCoord.xy;
+
+UV.y -= time * 0.004;
+
+vec3 diffuseTexture = texture(diffuseMap, UV.xy).xyz;
+
+fragColor = vec4(diffuseTexture, 1);
 }
