@@ -19,7 +19,6 @@ public:
 
 	void draw();
 
-
 	// Inherited via Application
 	virtual void OnGUI() override;
 
@@ -33,7 +32,6 @@ private:
 	Shader* m_shader;
 	Shader* m_multTexShader;
 	Shader* m_perlinShader;
-
 	
 	Texture* m_diffuseMap;
 	Texture* m_normalMap;

@@ -16,7 +16,7 @@ void main()
 {
 vec2 UV = vertexTextureCoord.xy;
 
-UV.y -= time * 0.004;
+UV.y -= time * 0.04;
 
 vec3 diffuseTexture = texture(diffuseMap, UV.xy).xyz;
 

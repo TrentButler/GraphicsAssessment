@@ -28,7 +28,9 @@ vertexBiTangent = cross(vertexNormal.xyz, vertexTangent);
 vec4 position = Position;
 vec4 diffuseTexture = texture(diffuseMap, TextureCoord.xy);
 
+//position.x += diffuseTexture.r * 100;
 position.y += diffuseTexture.r * 16;
+//position.z += diffuseTexture.r * 2;
 
 gl_Position = WVP * position;
 }

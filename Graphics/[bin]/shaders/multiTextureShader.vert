@@ -12,18 +12,24 @@ out vec3 vertexTextureCoord;
 out vec3 vertexTangent;
 out vec3 vertexBiTangent;
 
-uniform mat4 ModelMatrix;
-uniform mat4 NormalMatrix;
+uniform sampler2D perlinMap;
 
 uniform mat4 WVP;
 
 void main()
 {
-vertexPosition = ModelMatrix * Position;
+vertexPosition = Position;
 vertexColor = Color;
-vertexNormal = NormalMatrix * Normal;
+vertexNormal = Normal;
 vertexTextureCoord = TextureCoord;
 vertexTangent = Tangent.xyz;
 vertexBiTangent = cross(vertexNormal.xyz, vertexTangent);
-gl_Position = WVP * Position;
+
+
+//DO NOISE HERE
+vec4 position = Position;
+
+position.y += texture(perlinMap, TextureCoord.xy).r;
+
+gl_Position = WVP * position;
 }

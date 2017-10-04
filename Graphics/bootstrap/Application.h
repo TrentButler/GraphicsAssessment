@@ -18,6 +18,8 @@ protected:
 	virtual void draw() = 0;
 	virtual void OnGUI() = 0;
 
+	bool m_close;
+
 	unsigned int _width;
 	unsigned int _height;
 

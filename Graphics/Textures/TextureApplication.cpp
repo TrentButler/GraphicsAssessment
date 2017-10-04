@@ -9,6 +9,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw_gl3.h>
 #include <iostream>
+#include <vector>
 
 #pragma region 4.Ability to render a plane with predefined vertex information.
 Mesh* generatePlane(int width, int height)
@@ -139,7 +140,72 @@ Mesh* generateSphere(unsigned int segments, unsigned int rings,
 }
 #pragma endregion
 
+#pragma region GeneratePlane
+Mesh* generateGrid(unsigned int rows, unsigned int cols)
+{
+	auto aoVertices = new Vertex[rows * cols];
+	for (unsigned int r = 0; r < rows; ++r)
+	{
+		for (unsigned int c = 0; c < cols; ++c)
+		{
+			Vertex verts = {
+				glm::vec4(float(c), 0, float(r), 1), //POSITION
+				glm::vec4(0), //COLOR
+				glm::vec4(0, 1, 0, 0), //NORMAL
+				glm::vec3(float(c) / float(cols - 1), float(r) / float(rows - 1), 0), //TEXTURE COORDINATE
+				glm::vec4(0,1,0,0) //TANGENT
+			};
+			aoVertices[r * cols + c] = verts;
+		}
+	}
+
+	std::vector<Vertex> verts = std::vector<Vertex>();
+	std::vector<unsigned int> indices = std::vector<unsigned int>();
+
+	//Defining index count based off quad count (2 triangles per quad)
+	unsigned int* auiIndices = new unsigned int[(rows - 1) * (cols - 1) * 6];
+	unsigned int index = 0;
+	for (unsigned int r = 0; r < (rows - 1); ++r)
+	{
+		for (unsigned int c = 0; c < (cols - 1); ++c)
+		{
+			//Triangle 1
+			auiIndices[index++] = r * cols + c;
+			auiIndices[index++] = (r + 1) * cols + c;
+			auiIndices[index++] = (r + 1) * cols + (c + 1);
+			//Triangle 2
+			auiIndices[index++] = r * cols + c;
+			auiIndices[index++] = (r + 1) * cols + (c + 1);
+			auiIndices[index++] = r * cols + (c + 1);
+		}
+	}
+
+	for (unsigned int i = 0; i < (rows * cols); i++)
+	{
+		verts.push_back(aoVertices[i]);
+	}
+		
+	for (unsigned int i = 0; i < index; i++)
+	{
+		indices.push_back(auiIndices[i]);
+	}
+	
+	Mesh* plane = new Mesh();
+	plane->initialize(verts, indices);
+
+	delete[] aoVertices;
+	delete[] auiIndices;
+	return plane;
+}
+#pragma endregion
+
 #pragma region PerlinNoise
+float trentNoise()
+{
+	//MAKE NOISE HERE
+	return 0.0f;
+}
+
 std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 {
 	std::vector<float> noiseTexture;
@@ -188,13 +254,20 @@ void TextureApplication::startup()
 	m_camera->setPerspective(glm::pi<float>() / 4, (float)_width / (float)_height, 0.1f, 10000.0f);
 	
 #pragma region Objects
-	m_perlinMesh = new Mesh();
-	m_perlinMesh->loadOBJ("..//[bin]//objects//basic", "64x64plane.obj");
+	/*unsigned int Svao, Svbo, Sibo, Sindexcount;
+	m_perlinMesh = generateSphere(100, 100, Svao, Svbo, Sibo, Sindexcount);*/
+
+	/*m_perlinMesh = new Mesh();
+	m_perlinMesh->loadOBJ("..//[bin]//objects//basic", "64x64plane.obj");*/
+	m_perlinMesh = generateGrid(100, 100);
 
 	/*m_perlinMesh = new Mesh();
 	m_perlinMesh->loadOBJ("..//[bin]//objects/Heart", "heart.obj");*/
 
-	m_plane = generatePlane(100, 100);
+	//m_plane = generatePlane(100, 100);
+	//m_plane = new Mesh();
+	//m_plane->loadOBJ("..//[bin]//objects//basic", "64x64plane.obj");
+	m_plane = generateGrid(100, 100);
 
 	unsigned int vao, vbo, ibo, indexcount;	
 	m_sphere = generateSphere(100, 100, vao, vbo, ibo, indexcount);
@@ -234,6 +307,20 @@ void TextureApplication::startup()
 
 void TextureApplication::shutdown()
 {
+	delete m_camera;
+	delete m_plane;
+	delete m_sphere;
+	delete m_perlinMesh;
+
+	delete m_shader;
+	delete m_multTexShader;
+	delete m_perlinShader;
+
+	delete m_diffuseMap;
+	delete m_normalMap;
+	delete m_animatedTexture;
+	delete m_perlinTexture;	
+	return;
 }
 
 glm::mat4 sphereTransform = glm::mat4(1);
@@ -371,6 +458,11 @@ void TextureApplication::update(float deltaTime)
 		m_camera->setLookAt(m_camera->getWorldTransform()[3], perlinPlaneTransform[3], glm::vec3(0, 1, 0));
 	}
 
+	if (glfwGetKey(Application::_window, GLFW_KEY_ESCAPE))
+	{
+		m_close = true;
+	}
+
 	auto perlinTranslation = glm::mat4(
 		glm::vec4(1, 0, 0, 0),
 		glm::vec4(0, 1, 0, 0),
@@ -378,7 +470,7 @@ void TextureApplication::update(float deltaTime)
 		glm::vec4(150, 0, 0, 1)
 	);
 
-	perlinPlaneTransform = perlinTranslation * glm::scale(glm::vec3(0.4f)) * planeTransform;
+	perlinPlaneTransform = perlinTranslation * glm::scale(glm::vec3(1)) * planeTransform;
 }
 
 void TextureApplication::draw()
@@ -412,15 +504,19 @@ void TextureApplication::draw()
 
 	m_diffuseMap->bind(GL_TEXTURE0, GL_TEXTURE_2D);
 	m_normalMap->bind(GL_TEXTURE1, GL_TEXTURE_2D);	
+	m_perlinTexture->bind(GL_TEXTURE2, GL_TEXTURE_2D);
 
 	auto bumpmapVPUniform = m_multTexShader->getUniform("WVP");
 	auto bumpmaplightDirectionUniform = m_multTexShader->getUniform("lightDirection");
 	auto bumpmapDiffMapUniform = m_multTexShader->getUniform("diffuseMap");
 	auto bumpmapNormMapUniform = m_multTexShader->getUniform("normalMap");
+	//auto bumpmapPerlinUniform = m_multTexShader->getUniform("perlinMap");
 	
 	glUniform3fv(bumpmaplightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION	
 	glUniform1i(bumpmapDiffMapUniform, 0); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
-	glUniform1i(bumpmapNormMapUniform, 1); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM	
+	glUniform1i(bumpmapNormMapUniform, 1); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
+	
+	//glUniform1i(bumpmapPerlinUniform, 3);
 
 	glUniformMatrix4fv(bumpmapVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * planeTransform));
 	
@@ -438,7 +534,7 @@ void TextureApplication::draw()
 	glUniform1i(perlinDiffuseMapUniform, 3);
 	glUniformMatrix4fv(perlinWVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * perlinPlaneTransform));
 	
-	m_perlinMesh->draw(GL_QUADS);
+	m_perlinMesh->draw(GL_TRIANGLES);
 
 	m_perlinShader->unbind();
 #pragma endregion
