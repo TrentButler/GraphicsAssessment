@@ -65,6 +65,7 @@ void Application::run(const char* title, unsigned int width, unsigned int height
 
 			currTime = glfwGetTime();
 			deltaTime = currTime - prevTime; //DELTATIME CALCULATION
+			m_deltaTime = deltaTime;
 			prevTime = currTime;
 
 			glfwPollEvents(); //CHECK FOR ANY EVENTS

@@ -19,6 +19,7 @@ protected:
 	virtual void OnGUI() = 0;
 
 	bool m_close;
+	float m_deltaTime;
 
 	unsigned int _width;
 	unsigned int _height;

@@ -200,10 +200,14 @@ Mesh* generateGrid(unsigned int rows, unsigned int cols)
 #pragma endregion
 
 #pragma region PerlinNoise
-float trentNoise()
+float trentNoise(unsigned int seed)
 {
 	//MAKE NOISE HERE
-	return 0.0f;
+	//MAKE AN RANDOM DIRECTION BY ROTATING, SCALING AND TRANSLATING AN ORIGIN POINT
+	//	- USE SEED AS AN SCALER
+	
+	float noise = seed * 0.0004;
+	return noise;
 }
 
 std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
@@ -218,7 +222,8 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 	{
 		for (int j = 0; j < height; j++)
 		{
-			noiseTexture.push_back(glm::perlin(glm::vec2(i, j) * scale) * 0.5f + 0.5f);
+			//noiseTexture.push_back(glm::perlin(glm::vec2(i, j) * scale) * 0.5f + 0.5f);
+			noiseTexture.push_back(trentNoise(i * j + height));
 		}
 	}
 	
@@ -232,11 +237,25 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 			for (int o = 0; o < octaves; o++)
 			{
 				float freq = powf(2, float(o));
-				float perlinSample = glm::perlin(glm::vec2(float(x), float(y)) * scale * freq) * 0.5f + 0.5f;
+				//float perlinSample = glm::perlin(glm::vec2(float(x), float(y)) * scale * freq) * 0.5f + 0.5f;
+				float perlinSample = trentNoise((o * x * (y * freq))) * scale * freq;
 				noiseTexture[y * dims + x] += perlinSample * amplitude;
 				amplitude *= persistence;
 			}
 		}
+	}
+
+	std::vector<float> copy;
+	for (int i = 0; i < height; i+=width)
+	{
+		copy.push_back(noiseTexture[i]);
+	}
+
+	int j = 0;
+	for (int i = height; i > 0; i -= width)
+	{
+		noiseTexture[i] = copy[j];
+		j++;
 	}
 	
 	return noiseTexture;
@@ -259,7 +278,9 @@ void TextureApplication::startup()
 
 	/*m_perlinMesh = new Mesh();
 	m_perlinMesh->loadOBJ("..//[bin]//objects//basic", "64x64plane.obj");*/
-	m_perlinMesh = generateGrid(100, 100);
+	//m_perlinMesh = generateGrid(100, 100);
+	unsigned int Svao, Svbo, Sibo, Sindexcount;
+	m_perlinMesh = generateSphere(100, 100, Svao, Svbo, Sibo, Sindexcount);
 
 	/*m_perlinMesh = new Mesh();
 	m_perlinMesh->loadOBJ("..//[bin]//objects/Heart", "heart.obj");*/
@@ -470,7 +491,7 @@ void TextureApplication::update(float deltaTime)
 		glm::vec4(150, 0, 0, 1)
 	);
 
-	perlinPlaneTransform = perlinTranslation * glm::scale(glm::vec3(1)) * planeTransform;
+	perlinPlaneTransform = perlinTranslation * glm::scale(glm::vec3(100)) * planeTransform;
 }
 
 void TextureApplication::draw()
