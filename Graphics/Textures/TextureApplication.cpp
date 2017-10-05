@@ -10,6 +10,7 @@
 #include <imgui_impl_glfw_gl3.h>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #pragma region 4.Ability to render a plane with predefined vertex information.
 Mesh* generatePlane(int width, int height)
@@ -62,7 +63,7 @@ Mesh* generateSphere(unsigned int segments, unsigned int rings,
 			//// not a part of the AIEVertex, but this is how w generate bitangents
 			//vertex->bitangent = glm::vec4(glm::cross(glm::vec3(vertex->normal), glm::vec3(vertex->tangent)), 0);
 
-			vertex->texture = glm::vec3(segment / (float)segments, ring / (float)(rings + 1), 0);			
+			vertex->texture = glm::vec3(segment / (float)segments, ring / (float)(rings + 1), 0);
 		}
 	}
 
@@ -184,12 +185,12 @@ Mesh* generateGrid(unsigned int rows, unsigned int cols)
 	{
 		verts.push_back(aoVertices[i]);
 	}
-		
+
 	for (unsigned int i = 0; i < index; i++)
 	{
 		indices.push_back(auiIndices[i]);
 	}
-	
+
 	Mesh* plane = new Mesh();
 	plane->initialize(verts, indices);
 
@@ -200,13 +201,52 @@ Mesh* generateGrid(unsigned int rows, unsigned int cols)
 #pragma endregion
 
 #pragma region PerlinNoise
-float trentNoise(unsigned int seed)
+float trentNoise(float seed, glm::vec3 direction)
 {
 	//MAKE NOISE HERE
 	//MAKE AN RANDOM DIRECTION BY ROTATING, SCALING AND TRANSLATING AN ORIGIN POINT
 	//	- USE SEED AS AN SCALER
+	//	- MAKE SURE 'noise' IS BETWEEN (-1, 1)
+
+	//DEFINE SOME ROTATION MATRICES
+	//MAKE RANDOM DIRECTIONS BY ROTATING 'direction'
+	//KICK BACK A NUMBER TO REPRESENT THAT
+
+	//IM GONNNA USE BOTH 'YROT' AND 'XROT'
+	//	-BUT IM GONNA RANDOMIZE WHEN THEY ARE USED
+
+	float directionMag = std::sqrt((direction.x * direction.x) + (direction.y * direction.y) + (direction.z * direction.z));
+
+	float slice = std::max(1.0f, directionMag);
+
+	auto angle = 360 / seed;
+
+	auto YRot = glm::mat3(
+		glm::vec3(cosf(angle), 0, -sinf(angle)),
+		glm::vec3(0, 1, 0),
+		glm::vec3(sinf(angle), 0, cosf(angle))
+	);
+
+	auto XRot = glm::mat3(
+		glm::vec3(1, 0, 0),
+		glm::vec3(0, cosf(angle), sinf(angle)),
+		glm::vec3(0, -sinf(angle), cos(angle))
+	);
+
+	auto ZRot = glm::mat3(
+		glm::vec3(cosf(angle), sinf(angle), 0),
+		glm::vec3(-sinf(angle), cosf(angle), 0),
+		glm::vec3(0, 0, 1)
+	);
+
+
+	glm::vec3 newDirection = YRot * ZRot * XRot * direction;
+	//auto normDirection = glm::normalize(newDirection);
+	auto normDirection = newDirection;
+
+	//float noise = abs(normDirection.x);
+	float noise = abs(normDirection.x + normDirection.z);
 	
-	float noise = seed * 0.0004;
 	return noise;
 }
 
@@ -223,10 +263,10 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 		for (int j = 0; j < height; j++)
 		{
 			//noiseTexture.push_back(glm::perlin(glm::vec2(i, j) * scale) * 0.5f + 0.5f);
-			noiseTexture.push_back(trentNoise(i * j + height));
+			noiseTexture.push_back(trentNoise(j + scale * i, glm::normalize(glm::vec3(i + scale, 0.1f, j - scale))));
 		}
 	}
-	
+
 	for (int x = 0; x < width; x++)
 	{
 		for (int y = 0; y < height; y++)
@@ -238,7 +278,7 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 			{
 				float freq = powf(2, float(o));
 				//float perlinSample = glm::perlin(glm::vec2(float(x), float(y)) * scale * freq) * 0.5f + 0.5f;
-				float perlinSample = trentNoise((o * x * (y * freq))) * scale * freq;
+				float perlinSample = trentNoise(x + persistence * y, glm::normalize(glm::vec3(-x + persistence, -y + persistence, 1.0f))) * scale * freq;
 				noiseTexture[y * dims + x] += perlinSample * amplitude;
 				amplitude *= persistence;
 			}
@@ -246,18 +286,25 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 	}
 
 	std::vector<float> copy;
-	for (int i = 0; i < height; i+=width)
+	for (int i = 0; i < width*height / 2; i++)
 	{
-		copy.push_back(noiseTexture[i]);
+		//copy.push_back(noiseTexture[i]);
+		copy.push_back(trentNoise(i * 0.0021351841368558555f, glm::vec3(noiseTexture[i] / width, -noiseTexture[i], noiseTexture[i] / height)));
 	}
 
 	int j = 0;
-	for (int i = height; i > 0; i -= width)
+	for (int i = width*height / 2; i > 0; i--)
 	{
+		if (i % 2 == 0)
+		{
+			noiseTexture[i] = trentNoise(i * 0.0021351841368558555f, glm::vec3(-noiseTexture[i] / height, noiseTexture[i], -noiseTexture[i] / height));
+		}
 		noiseTexture[i] = copy[j];
 		j++;
 	}
-	
+
+
+
 	return noiseTexture;
 }
 #pragma endregion
@@ -271,16 +318,16 @@ void TextureApplication::startup()
 	//m_camera->setLookAt(glm::vec3(-20.1f, 50.0f, -100.1f), glm::vec3(0), glm::vec3(0, 1, 0));
 	m_camera->setLookAt(glm::vec3(-20.1f, 50.0f, -150.1f), glm::vec3(150, 0, 0), glm::vec3(0, 1, 0));
 	m_camera->setPerspective(glm::pi<float>() / 4, (float)_width / (float)_height, 0.1f, 10000.0f);
-	
+
 #pragma region Objects
 	/*unsigned int Svao, Svbo, Sibo, Sindexcount;
 	m_perlinMesh = generateSphere(100, 100, Svao, Svbo, Sibo, Sindexcount);*/
 
 	/*m_perlinMesh = new Mesh();
 	m_perlinMesh->loadOBJ("..//[bin]//objects//basic", "64x64plane.obj");*/
-	//m_perlinMesh = generateGrid(100, 100);
-	unsigned int Svao, Svbo, Sibo, Sindexcount;
-	m_perlinMesh = generateSphere(100, 100, Svao, Svbo, Sibo, Sindexcount);
+	m_perlinMesh = generateGrid(100, 100);
+	/*unsigned int Svao, Svbo, Sibo, Sindexcount;
+	m_perlinMesh = generateSphere(100, 100, Svao, Svbo, Sibo, Sindexcount);*/
 
 	/*m_perlinMesh = new Mesh();
 	m_perlinMesh->loadOBJ("..//[bin]//objects/Heart", "heart.obj");*/
@@ -290,7 +337,7 @@ void TextureApplication::startup()
 	//m_plane->loadOBJ("..//[bin]//objects//basic", "64x64plane.obj");
 	m_plane = generateGrid(100, 100);
 
-	unsigned int vao, vbo, ibo, indexcount;	
+	unsigned int vao, vbo, ibo, indexcount;
 	m_sphere = generateSphere(100, 100, vao, vbo, ibo, indexcount);
 #pragma endregion
 
@@ -314,7 +361,7 @@ void TextureApplication::startup()
 #pragma region Textures
 	m_diffuseMap = new Texture();
 	m_diffuseMap->load2D("..//[bin]//textures//diffuse", "151.JPG");
-	
+
 	m_normalMap = new Texture();
 	m_normalMap->load2D("..//[bin]//textures//normal", "151_norm.JPG");
 
@@ -340,7 +387,7 @@ void TextureApplication::shutdown()
 	delete m_diffuseMap;
 	delete m_normalMap;
 	delete m_animatedTexture;
-	delete m_perlinTexture;	
+	delete m_perlinTexture;
 	return;
 }
 
@@ -353,7 +400,7 @@ void TextureApplication::update(float deltaTime)
 {
 	runningTime += deltaTime;
 
-	sphereTransform = glm::scale(glm::vec3(1000));	
+	sphereTransform = glm::scale(glm::vec3(1000));
 	//CAMERA STUFF	
 	if (glfwGetMouseButton(Application::_window, 0) == true) //LOOK AT CENTER (0,0,0)
 	{
@@ -454,11 +501,11 @@ void TextureApplication::update(float deltaTime)
 		m_multTexShader->load("multiTextureShader.vert", GL_VERTEX_SHADER);
 		m_multTexShader->load("multiTextureShader.frag", GL_FRAGMENT_SHADER);
 		m_multTexShader->attach();
-		
+
 		m_shader->load("textureShader.vert", GL_VERTEX_SHADER);
 		m_shader->load("textureShader.frag", GL_FRAGMENT_SHADER);
 		m_shader->attach();
-		
+
 		m_perlinShader->load("perlinShader.vert", GL_VERTEX_SHADER);
 		m_perlinShader->load("perlinShader.frag", GL_FRAGMENT_SHADER);
 		m_perlinShader->attach();
@@ -491,7 +538,7 @@ void TextureApplication::update(float deltaTime)
 		glm::vec4(150, 0, 0, 1)
 	);
 
-	perlinPlaneTransform = perlinTranslation * glm::scale(glm::vec3(100)) * planeTransform;
+	perlinPlaneTransform = perlinTranslation * glm::scale(glm::vec3(1.5)) * planeTransform;
 }
 
 void TextureApplication::draw()
@@ -510,7 +557,7 @@ void TextureApplication::draw()
 	auto textureVPUniform = m_shader->getUniform("WVP");
 	auto vertexDiffMapUniform = m_shader->getUniform("diffuseMap");
 	auto timeUniform = m_shader->getUniform("time");
-	
+
 	glUniform1i(vertexDiffMapUniform, 2); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
 	glUniform1f(timeUniform, runningTime); //SEND THE FRAGMENT SHADER 'DELTATIME'
 
@@ -524,7 +571,7 @@ void TextureApplication::draw()
 	m_multTexShader->bind();
 
 	m_diffuseMap->bind(GL_TEXTURE0, GL_TEXTURE_2D);
-	m_normalMap->bind(GL_TEXTURE1, GL_TEXTURE_2D);	
+	m_normalMap->bind(GL_TEXTURE1, GL_TEXTURE_2D);
 	m_perlinTexture->bind(GL_TEXTURE2, GL_TEXTURE_2D);
 
 	auto bumpmapVPUniform = m_multTexShader->getUniform("WVP");
@@ -532,15 +579,15 @@ void TextureApplication::draw()
 	auto bumpmapDiffMapUniform = m_multTexShader->getUniform("diffuseMap");
 	auto bumpmapNormMapUniform = m_multTexShader->getUniform("normalMap");
 	//auto bumpmapPerlinUniform = m_multTexShader->getUniform("perlinMap");
-	
+
 	glUniform3fv(bumpmaplightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION	
 	glUniform1i(bumpmapDiffMapUniform, 0); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
 	glUniform1i(bumpmapNormMapUniform, 1); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
-	
+
 	//glUniform1i(bumpmapPerlinUniform, 3);
 
 	glUniformMatrix4fv(bumpmapVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * planeTransform));
-	
+
 	m_plane->draw(GL_TRIANGLES);
 	m_multTexShader->unbind();
 #pragma endregion
@@ -554,7 +601,7 @@ void TextureApplication::draw()
 
 	glUniform1i(perlinDiffuseMapUniform, 3);
 	glUniformMatrix4fv(perlinWVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * perlinPlaneTransform));
-	
+
 	m_perlinMesh->draw(GL_TRIANGLES);
 
 	m_perlinShader->unbind();
