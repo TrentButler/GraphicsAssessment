@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <time.h>
 
 #pragma region 4.Ability to render a plane with predefined vertex information.
 Mesh* generatePlane(int width, int height)
@@ -201,56 +202,59 @@ Mesh* generateGrid(unsigned int rows, unsigned int cols)
 #pragma endregion
 
 #pragma region PerlinNoise
-float trentNoise(float seed, glm::vec3 direction)
+int randomNumber(int initial)
 {
-	//MAKE NOISE HERE
-	//MAKE AN RANDOM DIRECTION BY ROTATING, SCALING AND TRANSLATING AN ORIGIN POINT
-	//	- USE SEED AS AN SCALER
-	//	- MAKE SURE 'noise' IS BETWEEN (-1, 1)
+	float firstRandom = (MAX_PATH)+sizeof(std::vector<float>);
+	auto secondRandom = initial + (sizeof(Vertex) * MAX_PATH);
+	auto thridRandom = firstRandom + secondRandom;
 
-	//DEFINE SOME ROTATION MATRICES
-	//MAKE RANDOM DIRECTIONS BY ROTATING 'direction'
-	//KICK BACK A NUMBER TO REPRESENT THAT
+	float fourthRandom = initial + secondRandom + thridRandom;
 
-	//IM GONNNA USE BOTH 'YROT' AND 'XROT'
-	//	-BUT IM GONNA RANDOMIZE WHEN THEY ARE USED
+	auto fifthNumber = abs((firstRandom + fourthRandom + secondRandom + MAX_PATH) + (initial + thridRandom) + sizeof(Vertex));
 
-	float directionMag = std::sqrt((direction.x * direction.x) + (direction.y * direction.y) + (direction.z * direction.z));
+	return fifthNumber;
+}
 
-	float slice = std::max(1.0f, directionMag);
+float trentNoise(unsigned int seed)
+{
+	std::vector<unsigned int> NUMBERS //SOME NUMBERS
+	{	61463, 	61469,	61471,	61483,	61487,	61493,	61507,	61511,	61519,	61543,
+		84919,	84947,	84961,	84967,	84977,	84979,	84991,	85009,	85021,	85027,
+		98953,	98963,	98981,	98993,	98999,	99013,	99017,	99023,	99041,	99053,
+		11939,	11941,	11953,	11959,	11969,	11971,	11981,	11987,	12007,	12011,
+		2833,	2837,	2843,	2851,	2857,	2861,	2879,	2887,	2897,	2903,
+		27091,	27103,	27107,	27109,	27127,	27143,	27179,	27191,	27197,	27211
+	};
 
-	auto angle = 360 / seed;
+	if (seed > 50)
+	{
+		seed = 0;
+	}
 
-	auto YRot = glm::mat3(
-		glm::vec3(cosf(angle), 0, -sinf(angle)),
-		glm::vec3(0, 1, 0),
-		glm::vec3(sinf(angle), 0, cosf(angle))
-	);
+	auto initial = NUMBERS[seed]; //PICK ONE RANDOMLY
 
-	auto XRot = glm::mat3(
-		glm::vec3(1, 0, 0),
-		glm::vec3(0, cosf(angle), sinf(angle)),
-		glm::vec3(0, -sinf(angle), cos(angle))
-	);
+	std::string rawNumber = std::to_string(initial);
+	std::string incrementor = { rawNumber[2] };
+	std::string incrementor2 = { rawNumber[3] };
 
-	auto ZRot = glm::mat3(
-		glm::vec3(cosf(angle), sinf(angle), 0),
-		glm::vec3(-sinf(angle), cosf(angle), 0),
-		glm::vec3(0, 0, 1)
-	);
+	int firstStage = std::stoi(incrementor);
+	int secondStage = std::stoi(incrementor2);
+	float noise = 0.0f;
 
+	for (int i = 0; i < firstStage; i++)
+	{
+		noise += 0.01f;
+	}
 
-	glm::vec3 newDirection = YRot * ZRot * XRot * direction;
-	//auto normDirection = glm::normalize(newDirection);
-	auto normDirection = newDirection;
-
-	//float noise = abs(normDirection.x);
-	float noise = abs(normDirection.x + normDirection.z);
+	for (int i = 0; i < secondStage; i++)
+	{
+		noise += 0.0002;
+	}
 	
 	return noise;
 }
 
-std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
+std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height, float seed)
 {
 	std::vector<float> noiseTexture;
 
@@ -263,7 +267,7 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 		for (int j = 0; j < height; j++)
 		{
 			//noiseTexture.push_back(glm::perlin(glm::vec2(i, j) * scale) * 0.5f + 0.5f);
-			noiseTexture.push_back(trentNoise(j + scale * i, glm::normalize(glm::vec3(i + scale, 0.1f, j - scale))));
+			noiseTexture.push_back(trentNoise(i));
 		}
 	}
 
@@ -273,37 +277,47 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 		{
 			float amplitude = 1.0f;
 			float persistence = 0.3f;
-			noiseTexture[y * dims + x] = 0.0f;
+			//noiseTexture[y * dims + x] = 0.0f;
 			for (int o = 0; o < octaves; o++)
 			{
 				float freq = powf(2, float(o));
 				//float perlinSample = glm::perlin(glm::vec2(float(x), float(y)) * scale * freq) * 0.5f + 0.5f;
-				float perlinSample = trentNoise(x + persistence * y, glm::normalize(glm::vec3(-x + persistence, -y + persistence, 1.0f))) * scale * freq;
+				float perlinSample = trentNoise(o) * scale * freq;
 				noiseTexture[y * dims + x] += perlinSample * amplitude;
 				amplitude *= persistence;
 			}
 		}
 	}
 
-	std::vector<float> copy;
-	for (int i = 0; i < width*height / 2; i++)
-	{
-		//copy.push_back(noiseTexture[i]);
-		copy.push_back(trentNoise(i * 0.0021351841368558555f, glm::vec3(noiseTexture[i] / width, -noiseTexture[i], noiseTexture[i] / height)));
-	}
+	//std::vector<float> copy;
+	//for (int i = 0; i < width*height; i++)
+	//{
+	//	copy.push_back(noiseTexture[i]);
+	//	//copy.push_back(trentNoise(randomNumber(i - width), glm::vec3(noiseTexture[i] / width, -noiseTexture[i], noiseTexture[i] / height)));
+	//}
 
-	int j = 0;
-	for (int i = width*height / 2; i > 0; i--)
-	{
-		if (i % 2 == 0)
-		{
-			noiseTexture[i] = trentNoise(i * 0.0021351841368558555f, glm::vec3(-noiseTexture[i] / height, noiseTexture[i], -noiseTexture[i] / height));
-		}
-		noiseTexture[i] = copy[j];
-		j++;
-	}
+	//int j = 0;
+	//for (int i = width*height - 1; i > 0; i--)
+	//{
+	//	if (i % 3 == 0)
+	//	{
+	//		//noiseTexture[i] = trentNoise(randomNumber(i - j), glm::vec3(-noiseTexture[i] / seed, noiseTexture[i] * seed, -noiseTexture[i] / seed));
+	//		noiseTexture[i] = copy[i];
+	//	}
 
+	//	if (i % 2 == 0)
+	//	{
+	//		noiseTexture[i] = 0.0f;
+	//	}
 
+	//	if (i % 5 == 0)
+	//	{
+	//		noiseTexture[i] = 1.0f;
+	//	}
+
+	//	//noiseTexture[i] = copy[j];
+	//	j++;
+	//}
 
 	return noiseTexture;
 }
@@ -369,7 +383,8 @@ void TextureApplication::startup()
 	m_animatedTexture->load2D("..//[bin]//textures//diffuse", "starfieldDiffuseMap.jpg");
 
 	m_perlinTexture = new Texture();
-	m_perlinTexture->generate2D(64, 64, generateNoiseTexture(64, 64));
+	auto number = randomNumber(465879);
+	m_perlinTexture->generate2D(64, 64, generateNoiseTexture(64, 64, number));
 #pragma endregion
 }
 
