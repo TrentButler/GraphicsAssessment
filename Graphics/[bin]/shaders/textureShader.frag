@@ -21,4 +21,5 @@ UV.y -= time * 0.04;
 vec3 diffuseTexture = texture(diffuseMap, UV.xy).xyz;
 
 fragColor = vec4(diffuseTexture, 1);
+//fragColor = vec4(1,1,1,1);
 }

@@ -29,7 +29,7 @@ vertexBiTangent = cross(vertexNormal.xyz, vertexTangent);
 //DO NOISE HERE
 vec4 position = Position;
 
-position.y += texture(perlinMap, TextureCoord.xy).r;
+//position.y += texture(perlinMap, TextureCoord.xy).r * 1.5;
 
 gl_Position = WVP * position;
 }

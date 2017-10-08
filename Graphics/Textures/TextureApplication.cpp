@@ -202,33 +202,70 @@ Mesh* generateGrid(unsigned int rows, unsigned int cols)
 #pragma endregion
 
 #pragma region PerlinNoise
-int randomNumber(int initial)
+unsigned int randomNumber(int initial)
 {
-	float firstRandom = (MAX_PATH)+sizeof(std::vector<float>);
-	auto secondRandom = initial + (sizeof(Vertex) * MAX_PATH);
-	auto thridRandom = firstRandom + secondRandom;
+	unsigned int number = 0;
+	//RETURN AN NUMBER BETWEEN 1-250
 
-	float fourthRandom = initial + secondRandom + thridRandom;
+	for (int i = 0; i < initial; i++)
+	{
+		number += 1;
+	}
 
-	auto fifthNumber = abs((firstRandom + fourthRandom + secondRandom + MAX_PATH) + (initial + thridRandom) + sizeof(Vertex));
+	for (int i = 0; i, number / 2; i++)
+	{
+		number += i;
+	}
 
-	return fifthNumber;
+	if (number >= 250)
+	{
+		number = 250;
+	}
+
+	return number;
 }
 
 float trentNoise(unsigned int seed)
 {
 	std::vector<unsigned int> NUMBERS //SOME NUMBERS
-	{	61463, 	61469,	61471,	61483,	61487,	61493,	61507,	61511,	61519,	61543,
+	{ 
+		61463, 	61469,	61471,	61483,	61487,	61493,	61507,	61511,	61519,	61543,
+		38287,	38299,	38303,	38317,	38321,	38327,	38329,	38333,	38351,	38371,	
+		38923,	38933,	38953,	38959,	38971,	38977,	38993,	39019,	39023,	39041,
+		39043,	39047,	39079,	39089,	39097,	39103,	39107,	39113,	39119,	39133,
+		39139,	39157,	39161,	39163,	39181,	39191,	39199,	39209,	39217,	39227,
+		39229,	39233,	39239,	39241,	39251,	39293,	39301,	39313,	39317,	39323,
+		38377,	38393,	38431,	38447,	38449,	38453,	38459,	38461,	38501,	38543,
+		38557,	38561,	38567,	38569,	38593,	38603,	38609,	38611,	38629,	38639,
+		39779,	39791,	39799,	39821,	39827,	39829,	39839,	39841,	39847,	39857,
+		38651,	38653,	38669,	38671,	38677,	38693,	38699,	38707,	38711,	38713,
+		2833,	2837,	2843,	2851,	2857,	2861,	2879,	2887,	2897,	2903,
+		38723,	38729,	38737,	38747,	38749,	38767,	38783,	38791,	38803,	38821,
+		38833,	38839,	38851,	38861,	38867,	38873,	38891,	38903,	38917,	38921,
+		39341,	39343,	39359,	39367,	39371,	39373,	39383,	39397,	39409,	39419,
+		39439,	39443,	39451,	39461,	39499,	39503,	39509,	39511,	39521,	39541,
+		39551,	39563,	39569,	39581,	39607,	39619,	39623,	39631,	39659,	39667,
+		39671,	39679,	39703,	39709,	39719,	39727,	39733,	39749,	39761,	39769,
 		84919,	84947,	84961,	84967,	84977,	84979,	84991,	85009,	85021,	85027,
 		98953,	98963,	98981,	98993,	98999,	99013,	99017,	99023,	99041,	99053,
 		11939,	11941,	11953,	11959,	11969,	11971,	11981,	11987,	12007,	12011,
-		2833,	2837,	2843,	2851,	2857,	2861,	2879,	2887,	2897,	2903,
-		27091,	27103,	27107,	27109,	27127,	27143,	27179,	27191,	27197,	27211
+		27091,	27103,	27107,	27109,	27127,	27143,	27179,	27191,	27197,	27211,
+
+		/*39863	39869	39877	39883	39887	39901	39929	39937	39953	39971
+		39979	39983	39989	40009	40013	40031	40037	40039	40063	40087
+		40093	40099	40111	40123	40127	40129	40151	40153	40163	40169
+		40177	40189	40193	40213	40231	40237	40241	40253	40277	40283
+		40289	40343	40351	40357	40361	40387	40423	40427	40429	40433
+		40459	40471	40483	40487	40493	40499	40507	40519	40529	40531
+		40543	40559	40577	40583	40591	40597	40609	40627	40637	40639
+		40693	40697	40699	40709	40739	40751	40759	40763	40771	40787
+		40801	40813	40819	40823	40829	40841	40847	40849	40853	40867*/
+
 	};
 
-	if (seed > 50)
+	if (seed > NUMBERS.size())
 	{
-		seed = 0;
+		seed = NUMBERS.size() / 2;
 	}
 
 	auto initial = NUMBERS[seed]; //PICK ONE RANDOMLY
@@ -236,21 +273,35 @@ float trentNoise(unsigned int seed)
 	std::string rawNumber = std::to_string(initial);
 	std::string incrementor = { rawNumber[2] };
 	std::string incrementor2 = { rawNumber[3] };
+	std::string incrementor3 = { rawNumber[1] };
+	std::string incrementor4 = { rawNumber[0] };
 
 	int firstStage = std::stoi(incrementor);
 	int secondStage = std::stoi(incrementor2);
+	int thirdStage = std::stoi(incrementor3);
+	int fourthStage = std::stoi(incrementor4);
 	float noise = 0.0f;
 
 	for (int i = 0; i < firstStage; i++)
 	{
-		noise += 0.01f;
+		noise += 0.10f;
 	}
 
 	for (int i = 0; i < secondStage; i++)
 	{
-		noise += 0.0002;
+		noise += 0.002f;
 	}
-	
+
+	for (int i = 0; i < thirdStage; i++)
+	{
+		noise -= 0.003f;
+	}
+
+	for (int i = 0; i < fourthStage; i++)
+	{
+		noise += 0.00009;
+	}
+
 	return noise;
 }
 
@@ -260,14 +311,14 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height,
 
 	int dims = width;
 	float scale = (1.0f / dims) * 3;
-	int octaves = 6;
+	int octaves = 10;
 
 	for (int i = 0; i < width; i++)
 	{
 		for (int j = 0; j < height; j++)
 		{
 			//noiseTexture.push_back(glm::perlin(glm::vec2(i, j) * scale) * 0.5f + 0.5f);
-			noiseTexture.push_back(trentNoise(i));
+			noiseTexture.push_back(trentNoise(j - i));
 		}
 	}
 
@@ -275,14 +326,14 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height,
 	{
 		for (int y = 0; y < height; y++)
 		{
-			float amplitude = 1.0f;
-			float persistence = 0.3f;
-			//noiseTexture[y * dims + x] = 0.0f;
+			float amplitude = 2.0f;
+			float persistence = 0.4f;
+			//noiseTexture[y * dims + x] += 0.0002f;
 			for (int o = 0; o < octaves; o++)
 			{
 				float freq = powf(2, float(o));
 				//float perlinSample = glm::perlin(glm::vec2(float(x), float(y)) * scale * freq) * 0.5f + 0.5f;
-				float perlinSample = trentNoise(o) * scale * freq;
+				float perlinSample = trentNoise(y + x) * scale * freq;
 				noiseTexture[y * dims + x] += perlinSample * amplitude;
 				amplitude *= persistence;
 			}
@@ -383,7 +434,7 @@ void TextureApplication::startup()
 	m_animatedTexture->load2D("..//[bin]//textures//diffuse", "starfieldDiffuseMap.jpg");
 
 	m_perlinTexture = new Texture();
-	auto number = randomNumber(465879);
+	int number = 0;
 	m_perlinTexture->generate2D(64, 64, generateNoiseTexture(64, 64, number));
 #pragma endregion
 }
@@ -599,7 +650,7 @@ void TextureApplication::draw()
 	glUniform1i(bumpmapDiffMapUniform, 0); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
 	glUniform1i(bumpmapNormMapUniform, 1); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
 
-	//glUniform1i(bumpmapPerlinUniform, 3);
+										   //glUniform1i(bumpmapPerlinUniform, 3);
 
 	glUniformMatrix4fv(bumpmapVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * planeTransform));
 

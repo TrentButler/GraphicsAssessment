@@ -16,4 +16,5 @@ void main()
 vec3 diffuseTexture = texture(diffuseMap, vertexTextureCoord.xy).rrr;
 
 fragColor = vec4(diffuseTexture + vertexColor.xyz, 1);
+//fragColor = vertexPosition;
 }
