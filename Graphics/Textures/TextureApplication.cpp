@@ -229,6 +229,9 @@ float trentNoise(unsigned int seed)
 {
 	std::vector<unsigned int> NUMBERS //SOME NUMBERS
 	{ 
+		40093,	40099,	40111,	40123,	40127,	40129,	40151,	40153,	40163,	40169,
+		40177,	40189,	40193,	40213,	40231,	40237,	40241,	40253,	40277,	40283,
+		40289,	40343,	40351,	40357,	40361,	40387,	40423,	40427,	40429,	40433,
 		61463, 	61469,	61471,	61483,	61487,	61493,	61507,	61511,	61519,	61543,
 		38287,	38299,	38303,	38317,	38321,	38327,	38329,	38333,	38351,	38371,	
 		38923,	38933,	38953,	38959,	38971,	38977,	38993,	39019,	39023,	39041,
@@ -243,6 +246,10 @@ float trentNoise(unsigned int seed)
 		38723,	38729,	38737,	38747,	38749,	38767,	38783,	38791,	38803,	38821,
 		38833,	38839,	38851,	38861,	38867,	38873,	38891,	38903,	38917,	38921,
 		39341,	39343,	39359,	39367,	39371,	39373,	39383,	39397,	39409,	39419,
+		40459,	40471,	40483,	40487,	40493,	40499,	40507,	40519,	40529,	40531,
+		40543,	40559,	40577,	40583,	40591,	40597,	40609,	40627,	40637,	40639,
+		40693,	40697,	40699,	40709,	40739,	40751,	40759,	40763,	40771,	40787,
+		40801,	40813,	40819,	40823,	40829,	40841,	40847,	40849,	40853,	40867,
 		39439,	39443,	39451,	39461,	39499,	39503,	39509,	39511,	39521,	39541,
 		39551,	39563,	39569,	39581,	39607,	39619,	39623,	39631,	39659,	39667,
 		39671,	39679,	39703,	39709,	39719,	39727,	39733,	39749,	39761,	39769,
@@ -250,17 +257,8 @@ float trentNoise(unsigned int seed)
 		98953,	98963,	98981,	98993,	98999,	99013,	99017,	99023,	99041,	99053,
 		11939,	11941,	11953,	11959,	11969,	11971,	11981,	11987,	12007,	12011,
 		27091,	27103,	27107,	27109,	27127,	27143,	27179,	27191,	27197,	27211,
-
-		/*39863	39869	39877	39883	39887	39901	39929	39937	39953	39971
-		39979	39983	39989	40009	40013	40031	40037	40039	40063	40087
-		40093	40099	40111	40123	40127	40129	40151	40153	40163	40169
-		40177	40189	40193	40213	40231	40237	40241	40253	40277	40283
-		40289	40343	40351	40357	40361	40387	40423	40427	40429	40433
-		40459	40471	40483	40487	40493	40499	40507	40519	40529	40531
-		40543	40559	40577	40583	40591	40597	40609	40627	40637	40639
-		40693	40697	40699	40709	40739	40751	40759	40763	40771	40787
-		40801	40813	40819	40823	40829	40841	40847	40849	40853	40867*/
-
+		39863,	39869,	39877,	39883,	39887,	39901,	39929,	39937,	39953,	39971,
+		39979,	39983,	39989,	40009,	40013,	40031,	40037,	40039,	40063,	40087
 	};
 
 	if (seed > NUMBERS.size())
@@ -271,6 +269,7 @@ float trentNoise(unsigned int seed)
 	auto initial = NUMBERS[seed]; //PICK ONE RANDOMLY
 
 	std::string rawNumber = std::to_string(initial);
+
 	std::string incrementor = { rawNumber[2] };
 	std::string incrementor2 = { rawNumber[3] };
 	std::string incrementor3 = { rawNumber[1] };
@@ -284,22 +283,58 @@ float trentNoise(unsigned int seed)
 
 	for (int i = 0; i < firstStage; i++)
 	{
-		noise += 0.10f;
+		std::string first = { '0', '.', '0' };
+		auto convertedFirst = std::to_string(firstStage);
+		for (int j = 0; j < convertedFirst.size(); j++)
+		{
+			first += convertedFirst[j];
+		}
+		float num1 = std::stof(first);
+
+		noise += num1;
 	}
 
 	for (int i = 0; i < secondStage; i++)
 	{
-		noise += 0.002f;
+		std::string second = { '0', '.', '0', '0',  };
+		auto convertedSecond = std::to_string(secondStage);
+		for (int j = 0; j < convertedSecond.size(); j++)
+		{
+			second += convertedSecond[j];
+		}
+		float num2 = std::stof(second);
+
+		noise += num2;
 	}
 
 	for (int i = 0; i < thirdStage; i++)
 	{
-		noise -= 0.003f;
+		std::string third = { '0', '.', '0', '0' };
+		auto convertedThird = std::to_string(thirdStage);
+		for (int j = 0; j < convertedThird.size(); j++)
+		{
+			third += convertedThird[j];
+		}
+
+		float num3 = std::stof(third);
+
+		noise -= num3;
+		//noise -= 0.003f;
 	}
 
 	for (int i = 0; i < fourthStage; i++)
 	{
-		noise += 0.00009;
+		std::string fourth = { '0', '.', '0', '0'};
+		auto convertedFourth = std::to_string(fourthStage);
+		for (int j = 0; j < convertedFourth.size(); j++)
+		{
+			fourth += convertedFourth[j];
+		}
+		float num4 = std::stof(fourth);
+
+		noise -= num4;
+
+		//noise += 0.00009;
 	}
 
 	return noise;
@@ -311,7 +346,7 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height,
 
 	int dims = width;
 	float scale = (1.0f / dims) * 3;
-	int octaves = 10;
+	int octaves = 6;
 
 	for (int i = 0; i < width; i++)
 	{
