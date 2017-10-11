@@ -202,42 +202,24 @@ Mesh* generateGrid(unsigned int rows, unsigned int cols)
 #pragma endregion
 
 #pragma region PerlinNoise
-unsigned int randomNumber(int initial)
-{
-	unsigned int number = 0;
-	//RETURN AN NUMBER BETWEEN 1-250
-
-	for (int i = 0; i < initial; i++)
-	{
-		number += 1;
-	}
-
-	for (int i = 0; i, number / 2; i++)
-	{
-		number += i;
-	}
-
-	if (number >= 250)
-	{
-		number = 250;
-	}
-
-	return number;
-}
-
 float trentNoise(unsigned int seed)
 {
+	//USING STRING MANIPULATION, GENERATE A RANDOM FLOATING POINT NUMBER
 	std::vector<unsigned int> NUMBERS //SOME NUMBERS
-	{ 
+	{
 		40093,	40099,	40111,	40123,	40127,	40129,	40151,	40153,	40163,	40169,
 		40177,	40189,	40193,	40213,	40231,	40237,	40241,	40253,	40277,	40283,
 		40289,	40343,	40351,	40357,	40361,	40387,	40423,	40427,	40429,	40433,
 		61463, 	61469,	61471,	61483,	61487,	61493,	61507,	61511,	61519,	61543,
-		38287,	38299,	38303,	38317,	38321,	38327,	38329,	38333,	38351,	38371,	
+		38287,	38299,	38303,	38317,	38321,	38327,	38329,	38333,	38351,	38371,
 		38923,	38933,	38953,	38959,	38971,	38977,	38993,	39019,	39023,	39041,
 		39043,	39047,	39079,	39089,	39097,	39103,	39107,	39113,	39119,	39133,
 		39139,	39157,	39161,	39163,	39181,	39191,	39199,	39209,	39217,	39227,
 		39229,	39233,	39239,	39241,	39251,	39293,	39301,	39313,	39317,	39323,
+		40459,	40471,	40483,	40487,	40493,	40499,	40507,	40519,	40529,	40531,
+		40543,	40559,	40577,	40583,	40591,	40597,	40609,	40627,	40637,	40639,
+		40693,	40697,	40699,	40709,	40739,	40751,	40759,	40763,	40771,	40787,
+		40801,	40813,	40819,	40823,	40829,	40841,	40847,	40849,	40853,	40867,
 		38377,	38393,	38431,	38447,	38449,	38453,	38459,	38461,	38501,	38543,
 		38557,	38561,	38567,	38569,	38593,	38603,	38609,	38611,	38629,	38639,
 		39779,	39791,	39799,	39821,	39827,	39829,	39839,	39841,	39847,	39857,
@@ -246,10 +228,6 @@ float trentNoise(unsigned int seed)
 		38723,	38729,	38737,	38747,	38749,	38767,	38783,	38791,	38803,	38821,
 		38833,	38839,	38851,	38861,	38867,	38873,	38891,	38903,	38917,	38921,
 		39341,	39343,	39359,	39367,	39371,	39373,	39383,	39397,	39409,	39419,
-		40459,	40471,	40483,	40487,	40493,	40499,	40507,	40519,	40529,	40531,
-		40543,	40559,	40577,	40583,	40591,	40597,	40609,	40627,	40637,	40639,
-		40693,	40697,	40699,	40709,	40739,	40751,	40759,	40763,	40771,	40787,
-		40801,	40813,	40819,	40823,	40829,	40841,	40847,	40849,	40853,	40867,
 		39439,	39443,	39451,	39461,	39499,	39503,	39509,	39511,	39521,	39541,
 		39551,	39563,	39569,	39581,	39607,	39619,	39623,	39631,	39659,	39667,
 		39671,	39679,	39703,	39709,	39719,	39727,	39733,	39749,	39761,	39769,
@@ -261,151 +239,127 @@ float trentNoise(unsigned int seed)
 		39979,	39983,	39989,	40009,	40013,	40031,	40037,	40039,	40063,	40087
 	};
 
-	if (seed > NUMBERS.size())
+	if (seed > NUMBERS.size()) //IF 'seed' IS LARGER THAN THE SIZE OF ARRAY 'NUMBERS'
 	{
-		seed = NUMBERS.size() / 2;
+		seed = NUMBERS.size() / 2; // DIVIDE 'seed' BY TWO(2)
 	}
 
-	auto initial = NUMBERS[seed]; //PICK ONE RANDOMLY
+	unsigned int random = std::rand() % NUMBERS.size();
 
-	std::string rawNumber = std::to_string(initial);
+	//unsigned int initial = NUMBERS[seed]; //PICK ONE RANDOMLY USING 'seed'
+	unsigned int initial = NUMBERS[random]; //PICK ONE RANDOMLY USING 'std::rand()'
 
+	std::string rawNumber = std::to_string(initial); //CONVERT 'initial' TO A STRING
+
+	//FROM THE UNSIGNED INT 'initial' PICK A SINGLE DIGIT THAT WILL BE USED TO TERMINATE A 'for' LOOP	
 	std::string incrementor = { rawNumber[2] };
 	std::string incrementor2 = { rawNumber[3] };
 	std::string incrementor3 = { rawNumber[1] };
 	std::string incrementor4 = { rawNumber[0] };
 
+	//CONVERT THE PICKED DIGIT TO AN INTEGER
 	int firstStage = std::stoi(incrementor);
 	int secondStage = std::stoi(incrementor2);
 	int thirdStage = std::stoi(incrementor3);
 	int fourthStage = std::stoi(incrementor4);
-	float noise = 0.0f;
+
+	float noise = 0.0f; //INITIAL NOISE VALUE
 
 	for (int i = 0; i < firstStage; i++)
 	{
-		std::string first = { '0', '.', '0' };
-		auto convertedFirst = std::to_string(firstStage);
-		for (int j = 0; j < convertedFirst.size(); j++)
+		std::string first = { '0', '.', '0' }; //DEFINE THE INTITAL FLOATING POINT NUMBER
+		std::string convertedFirst = std::to_string(firstStage); //CONVERT THE INTEGER 'firstStage' TO A STRING
+		for (int j = 0; j < convertedFirst.size(); j++) //APPEND THE VALUE(S) FROM 'convertedFirst' TO THE STRING 'first'
 		{
 			first += convertedFirst[j];
 		}
-		float num1 = std::stof(first);
+		float num1 = std::stof(first); //CONVERT THE STRING 'first' TO A FLOAT
 
-		noise += num1;
+		noise += num1; //INCREMENT 'noise' BY 'num1'
 	}
 
 	for (int i = 0; i < secondStage; i++)
 	{
-		std::string second = { '0', '.', '0', '0',  };
-		auto convertedSecond = std::to_string(secondStage);
-		for (int j = 0; j < convertedSecond.size(); j++)
+		std::string second = { '0', '.', '0', '0', }; //DEFINE THE INTITAL FLOATING POINT NUMBER
+		std::string convertedSecond = std::to_string(secondStage); //CONVERT THE INTEGER 'secondStage' TO A STRING
+		for (int j = 0; j < convertedSecond.size(); j++) //APPEND THE VALUE(S) FROM 'convertedSecond' TO THE STRING 'second'
 		{
 			second += convertedSecond[j];
 		}
-		float num2 = std::stof(second);
+		float num2 = std::stof(second); //CONVERT THE STRING 'second' TO A FLOAT
 
-		noise += num2;
+		noise += num2; //INCREMENT 'noise' BY 'num2'
 	}
 
 	for (int i = 0; i < thirdStage; i++)
 	{
-		std::string third = { '0', '.', '0', '0' };
-		auto convertedThird = std::to_string(thirdStage);
-		for (int j = 0; j < convertedThird.size(); j++)
+		std::string third = { '0', '.', '0', '0' }; //DEFINE THE INTITAL FLOATING POINT NUMBER
+		std::string convertedThird = std::to_string(thirdStage); //CONVERT THE INTEGER 'thirdStage' TO A STRING
+		for (int j = 0; j < convertedThird.size(); j++) //APPEND THE VALUE(S) FROM 'convertedThird' TO THE STRING 'third'
 		{
 			third += convertedThird[j];
 		}
 
-		float num3 = std::stof(third);
+		float num3 = std::stof(third); //CONVERT THE STRING 'third' TO A FLOAT
 
-		noise -= num3;
-		//noise -= 0.003f;
+		noise -= num3; //INCREMENT 'noise' BY 'num3'		
 	}
 
 	for (int i = 0; i < fourthStage; i++)
 	{
-		std::string fourth = { '0', '.', '0', '0'};
-		auto convertedFourth = std::to_string(fourthStage);
-		for (int j = 0; j < convertedFourth.size(); j++)
+		std::string fourth = { '0', '.', '0', '0' }; //DEFINE THE INTITAL FLOATING POINT NUMBER
+		std::string convertedFourth = std::to_string(fourthStage); //CONVERT THE INTEGER 'fourthStage' TO A STRING
+		for (int j = 0; j < convertedFourth.size(); j++) //APPEND THE VALUE(S) FROM 'convertedFourth' TO THE STRING 'fourth'
 		{
 			fourth += convertedFourth[j];
 		}
-		float num4 = std::stof(fourth);
+		float num4 = std::stof(fourth); //CONVERT THE STRING 'fourth' TO A FLOAT
 
-		noise -= num4;
-
-		//noise += 0.00009;
+		noise -= num4; //INCREMENT 'noise' BY 'num4'
 	}
 
-	return noise;
+	return noise; //RETURN THE GENERATED NOISE
 }
 
-std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height, float seed)
+std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 {
-	std::vector<float> noiseTexture;
+	std::vector<float> noiseTexture; //ARRAY OF FLOAT VALUES THAT REPRESENT THE 'NOISE' TEXTURE
 
 	int dims = width;
 	float scale = (1.0f / dims) * 3;
 	int octaves = 6;
 
+	//INITILIZE AN (n*n) GRID WITH EACH NODE HAVING THE VALUE OF ZERO(0)
 	for (int i = 0; i < width; i++)
 	{
 		for (int j = 0; j < height; j++)
 		{
-			//noiseTexture.push_back(glm::perlin(glm::vec2(i, j) * scale) * 0.5f + 0.5f);
-			noiseTexture.push_back(trentNoise(j - i));
+			noiseTexture.push_back(0.0f);
 		}
 	}
 
+	//POPULATE EACH NODE IN AN (n*n) GRID WITH A NOISE VALUE
 	for (int x = 0; x < width; x++)
 	{
 		for (int y = 0; y < height; y++)
 		{
-			float amplitude = 2.0f;
+			float amplitude = 1.0f;
 			float persistence = 0.4f;
-			//noiseTexture[y * dims + x] += 0.0002f;
+			noiseTexture[y * dims + x] = 0.0f;
+
+			//ITERATE THROUGH THE (n*n) GRID AND APPLY MORE DETAILED 'perlin' SAMPLES
 			for (int o = 0; o < octaves; o++)
 			{
 				float freq = powf(2, float(o));
-				//float perlinSample = glm::perlin(glm::vec2(float(x), float(y)) * scale * freq) * 0.5f + 0.5f;
-				float perlinSample = trentNoise(y + x) * scale * freq;
+				float perlinSample = glm::perlin(glm::vec2(float(x), float(y)) * scale * freq) * 0.5f + 0.5f; //PERLIN NOISE
+				//float perlinSample = trentNoise(y + x) * scale * freq; //TRENT NOISE
 				noiseTexture[y * dims + x] += perlinSample * amplitude;
 				amplitude *= persistence;
 			}
 		}
 	}
 
-	//std::vector<float> copy;
-	//for (int i = 0; i < width*height; i++)
-	//{
-	//	copy.push_back(noiseTexture[i]);
-	//	//copy.push_back(trentNoise(randomNumber(i - width), glm::vec3(noiseTexture[i] / width, -noiseTexture[i], noiseTexture[i] / height)));
-	//}
-
-	//int j = 0;
-	//for (int i = width*height - 1; i > 0; i--)
-	//{
-	//	if (i % 3 == 0)
-	//	{
-	//		//noiseTexture[i] = trentNoise(randomNumber(i - j), glm::vec3(-noiseTexture[i] / seed, noiseTexture[i] * seed, -noiseTexture[i] / seed));
-	//		noiseTexture[i] = copy[i];
-	//	}
-
-	//	if (i % 2 == 0)
-	//	{
-	//		noiseTexture[i] = 0.0f;
-	//	}
-
-	//	if (i % 5 == 0)
-	//	{
-	//		noiseTexture[i] = 1.0f;
-	//	}
-
-	//	//noiseTexture[i] = copy[j];
-	//	j++;
-	//}
-
-	return noiseTexture;
+	return noiseTexture; //RETURN THE ARRAY REPRESENTATION OF THE 'noise' TEXTURE
 }
 #pragma endregion
 
@@ -469,8 +423,7 @@ void TextureApplication::startup()
 	m_animatedTexture->load2D("..//[bin]//textures//diffuse", "starfieldDiffuseMap.jpg");
 
 	m_perlinTexture = new Texture();
-	int number = 0;
-	m_perlinTexture->generate2D(64, 64, generateNoiseTexture(64, 64, number));
+	m_perlinTexture->generate2D(64, 64, generateNoiseTexture(64, 64));
 #pragma endregion
 }
 
@@ -711,21 +664,21 @@ void TextureApplication::draw()
 
 void TextureApplication::OnGUI()
 {
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu("FILE"))
-		{
-			if (ImGui::MenuItem("NEW GEOMETRY")) {}
-			if (ImGui::MenuItem("NEW VERTEX SHADER")) {}
-			if (ImGui::MenuItem("NEW FRAGMENT SHADER")) {}
-			ImGui::EndMenu(); //END THE MENU
-		}
+	//if (ImGui::BeginMainMenuBar())
+	//{
+	//	if (ImGui::BeginMenu("FILE"))
+	//	{
+	//		if (ImGui::MenuItem("NEW GEOMETRY")) {}
+	//		if (ImGui::MenuItem("NEW VERTEX SHADER")) {}
+	//		if (ImGui::MenuItem("NEW FRAGMENT SHADER")) {}
+	//		ImGui::EndMenu(); //END THE MENU
+	//	}
 
-		if (ImGui::BeginMenu("EDIT"))
-		{
+	//	if (ImGui::BeginMenu("EDIT"))
+	//	{
 
-			ImGui::EndMenu(); //END THE MENU
-		}
-		ImGui::EndMainMenuBar(); //END THE MAIN MENU BAR
-	}
+	//		ImGui::EndMenu(); //END THE MENU
+	//	}
+	//	ImGui::EndMainMenuBar(); //END THE MAIN MENU BAR
+	//}
 }

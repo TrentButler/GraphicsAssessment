@@ -29,7 +29,7 @@ vec4 position = Position;
 vec4 diffuseTexture = texture(diffuseMap, TextureCoord.xy);
 
 //position.x += diffuseTexture.r * 1.5;
-position.y += diffuseTexture.r * 10;
+//position.y += diffuseTexture.r * 10;
 //position.z += diffuseTexture.r * 2;
 
 gl_Position = WVP * position;
