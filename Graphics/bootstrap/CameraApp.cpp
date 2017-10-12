@@ -19,7 +19,10 @@ void CameraApp::startup()
 	Gizmos::create();
 }
 
-void CameraApp::shutdown() {};
+void CameraApp::shutdown() 
+{
+	delete _camera;
+}
 
 static double prevMouseX = 0; //USED TO CALCULATE THE MOUSE DELTA X
 static double prevMouseY = 0; //USED TO CALCULATE THE MOUSE DELTA Y
@@ -200,4 +203,8 @@ void CameraApp::draw()
 
 
 	Gizmos::draw(this->_camera->getProjectionView());
+}
+
+void CameraApp::OnGUI()
+{
 }

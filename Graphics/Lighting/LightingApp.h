@@ -38,4 +38,8 @@ private:
 	Shader* m_blinn;
 	Shader* m_phong;
 
+
+	// Inherited via Application
+	virtual void OnGUI() override;
+
 };

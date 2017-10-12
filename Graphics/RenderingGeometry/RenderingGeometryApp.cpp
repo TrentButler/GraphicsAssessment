@@ -10,7 +10,6 @@
 #include <gtc/constants.hpp>
 #define PI 3.14159265359
 
-
 #pragma region 1.Function that generates a half circle given a number of points and radius.
 std::vector<Vertex> genHalfCircle(float radius, int numPoints)
 {
@@ -198,7 +197,7 @@ void RenderingGeometryApp::startup()
 	m_textureShader->attach();
 
 	m_texture = new Texture();
-	m_texture->load("..//[bin]//textures", "hdFurTexture.jpg");
+	m_texture->load2D("..//[bin]//textures", "hdFurTexture.jpg");
 
 	m_plane = generatePlane(100, 100);
 	m_cube = generateCube(10);
@@ -426,7 +425,7 @@ void RenderingGeometryApp::draw()
 
 #pragma region LoadedObject
 	m_textureShader->bind();
-	m_texture->bind();
+	m_texture->bind(GL_TEXTURE0, GL_TEXTURE_2D);
 	auto loadProjectionViewUniform = m_textureShader->getUniform("worldViewProjection");
 	//auto loadDiffuseUniform = m_textureShader->getUniform("diffuse");
 	glUniformMatrix4fv(loadProjectionViewUniform, 1, GL_FALSE, glm::value_ptr(projView * loadObjTransform));
@@ -435,4 +434,8 @@ void RenderingGeometryApp::draw()
 	m_textureShader->unbind();
 #pragma endregion
 
+}
+
+void RenderingGeometryApp::OnGUI()
+{
 }

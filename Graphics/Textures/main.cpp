@@ -1,4 +1,5 @@
 #include "TextureApplication.h"
+#include <CameraApp.h>
 
 int main()
 {

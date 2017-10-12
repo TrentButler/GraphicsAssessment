@@ -32,4 +32,7 @@ private:
 	Texture* m_texture;
 
 	Camera* m_camera;
+
+	// Inherited via Application
+	virtual void OnGUI() override;
 };
