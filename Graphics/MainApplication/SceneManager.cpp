@@ -7,11 +7,13 @@
 SceneManager::SceneManager() {};
 SceneManager::~SceneManager() {};
 
-
 void SceneManager::ChangeScene(Scene scene, Application* app)
 {
-	unsigned int appWidth = Application::_width;
-	unsigned int appHeight = Application::_height;
+	//CREATE A NEW 'SCENE' BY LOADING UP AN APP
+	//'HAND-OFF' THE NEW APP'S INFO TO THE OLD APP
+
+	unsigned int appWidth = 900;
+	unsigned int appHeight = 600;
 	//bool appFullscreen = Application::_fullscreen;
 
 	switch (scene)
@@ -22,8 +24,7 @@ void SceneManager::ChangeScene(Scene scene, Application* app)
 	case CAMERA:
 	{
 		Application* newApp = new CameraApp(); //MAKE A NEW APP
-		app = newApp;
-		app->run("camera app", appWidth, appHeight, false);
+		newApp->run("camera app", appWidth, appHeight, false);
 		break;
 	}
 

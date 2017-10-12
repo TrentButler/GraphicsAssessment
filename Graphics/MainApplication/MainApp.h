@@ -31,5 +31,5 @@ private:
 	Shader* m_shader;
 	Texture* m_animatedTexture;
 
-	SceneManager* manager;
+	SceneManager* m_manager;
 };

@@ -132,6 +132,7 @@ MainApp::~MainApp() {}
 
 void MainApp::startup() 
 {
+	m_manager = new SceneManager();
 	m_camera = new FlyCamera();
 	//m_camera->setLookAt(glm::vec3(-20.1f, 50.0f, -100.1f), glm::vec3(0), glm::vec3(0, 1, 0));
 	m_camera->setLookAt(glm::vec3(-20.1f, 50.0f, -150.1f), glm::vec3(150, 0, 0), glm::vec3(0, 1, 0));
@@ -149,7 +150,14 @@ void MainApp::startup()
 	m_animatedTexture->load2D("..//[bin]//textures//diffuse", "starfieldDiffuseMap.jpg");
 }
 
-void MainApp::shutdown() {}
+void MainApp::shutdown() 
+{
+	delete m_camera;
+	delete m_sphere;
+	delete m_shader;
+	delete m_animatedTexture;
+	delete this;
+}
 
 glm::mat4 skyboxTransform = glm::mat4(1);
 float runningTime = 0;
@@ -272,7 +280,12 @@ void MainApp::update(float deltaTime)
 
 	if (glfwGetKey(Application::_window, GLFW_KEY_1))
 	{
-		manager->ChangeScene(Scene::CAMERA, this);
+
+		//FIND A WAY TO MANIPULATE THE CURRENT WINDOW CONTEXT
+
+		/*shutdown();
+		m_manager->ChangeScene(Scene::CAMERA, this);
+		glfwTerminate();*/
 	}
 
 }
