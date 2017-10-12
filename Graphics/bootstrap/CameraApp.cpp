@@ -201,3 +201,7 @@ void CameraApp::draw()
 
 	Gizmos::draw(this->_camera->getProjectionView());
 }
+
+void CameraApp::OnGUI()
+{
+}

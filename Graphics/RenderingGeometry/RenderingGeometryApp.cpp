@@ -198,7 +198,7 @@ void RenderingGeometryApp::startup()
 	m_textureShader->attach();
 
 	m_texture = new Texture();
-	m_texture->load("..//[bin]//textures", "hdFurTexture.jpg");
+	m_texture->load2D("..//[bin]//textures//diffuse", "crate.png");
 
 	m_plane = generatePlane(100, 100);
 	m_cube = generateCube(10);
@@ -399,7 +399,7 @@ void RenderingGeometryApp::draw()
 
 #pragma region Plane
 	m_defaultShader->bind();
-	auto projectionviewUniform = m_defaultShader->getUniform("worldViewProjection"); //GET HANDLE FOR THE UNIFORM MAT4 FOR THE WORLDVIEW MATRIX
+	auto projectionviewUniform = m_defaultShader->getUniform("WVP"); //GET HANDLE FOR THE UNIFORM MAT4 FOR THE WORLDVIEW MATRIX
 	glUniformMatrix4fv(projectionviewUniform, 1, GL_FALSE, glm::value_ptr(projView * planeTransform)); // SEND THE SHADER PROGRAM A MODELVIEWPROJECTION MATRIX
 	m_plane->draw(GL_TRIANGLES);
 	m_defaultShader->unbind();
@@ -407,7 +407,7 @@ void RenderingGeometryApp::draw()
 
 #pragma region Cube
 	m_defaultShader->bind();
-	auto cProjectionViewUniform = m_defaultShader->getUniform("worldViewProjection");
+	auto cProjectionViewUniform = m_defaultShader->getUniform("WVP");
 	glUniformMatrix4fv(cProjectionViewUniform, 1, GL_FALSE, glm::value_ptr(projView * cubeTransform));
 	m_cube->draw(GL_TRIANGLES);
 	m_defaultShader->unbind();
@@ -415,7 +415,7 @@ void RenderingGeometryApp::draw()
 
 #pragma region Sphere
 	m_defaultShader->bind();
-	auto sProjectionViewUniform = m_defaultShader->getUniform("worldViewProjection"); //GET HANDLE FOR THE UNIFORM MAT4 FOR THE WORLDVIEW MATRIX
+	auto sProjectionViewUniform = m_defaultShader->getUniform("WVP"); //GET HANDLE FOR THE UNIFORM MAT4 FOR THE WORLDVIEW MATRIX
 	glUniformMatrix4fv(sProjectionViewUniform, 1, GL_FALSE, glm::value_ptr(projView * sphereTransform)); // SEND THE SHADER PROGRAM A MODELVIEWPROJECTION MATRIX	
 	glPrimitiveRestartIndex(0xFFFF);
 	glEnable(GL_PRIMITIVE_RESTART);
@@ -426,8 +426,8 @@ void RenderingGeometryApp::draw()
 
 #pragma region LoadedObject
 	m_textureShader->bind();
-	m_texture->bind();
-	auto loadProjectionViewUniform = m_textureShader->getUniform("worldViewProjection");
+	m_texture->bind(GL_TEXTURE0, GL_TEXTURE_2D);
+	auto loadProjectionViewUniform = m_textureShader->getUniform("WVP");
 	//auto loadDiffuseUniform = m_textureShader->getUniform("diffuse");
 	glUniformMatrix4fv(loadProjectionViewUniform, 1, GL_FALSE, glm::value_ptr(projView * loadObjTransform));
 	//glUniform1i(loadDiffuseUniform, 0);
@@ -435,4 +435,8 @@ void RenderingGeometryApp::draw()
 	m_textureShader->unbind();
 #pragma endregion
 
+}
+
+void RenderingGeometryApp::OnGUI()
+{
 }

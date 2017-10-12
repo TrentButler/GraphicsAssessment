@@ -321,6 +321,47 @@ float trentNoise(unsigned int seed)
 	return noise; //RETURN THE GENERATED NOISE
 }
 
+std::vector<float> generatePerlinNoiseTexture(unsigned int width, unsigned int height)
+{
+	std::vector<float> noiseTexture; //ARRAY OF FLOAT VALUES THAT REPRESENT THE 'NOISE' TEXTURE
+
+	int dims = width;
+	float scale = (1.0f / dims) * 3;
+	int octaves = 6;
+
+	//INITILIZE AN (n*n) GRID WITH EACH NODE HAVING THE VALUE OF ZERO(0)
+	for (int i = 0; i < width; i++)
+	{
+		for (int j = 0; j < height; j++)
+		{
+			noiseTexture.push_back(0.0f);
+		}
+	}
+
+	//POPULATE EACH NODE IN AN (n*n) GRID WITH A NOISE VALUE
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+			float amplitude = 1.0f;
+			float persistence = 0.4f;
+			noiseTexture[y * dims + x] = 0.0f;
+
+			//ITERATE THROUGH THE (n*n) GRID AND APPLY MORE DETAILED 'perlin' SAMPLES
+			for (int o = 0; o < octaves; o++)
+			{
+				float freq = powf(2, float(o));
+				float perlinSample = glm::perlin(glm::vec2(float(x), float(y)) * scale * freq) * 0.5f + 0.5f; //PERLIN NOISE
+				//float perlinSample = trentNoise(y + x) * scale * freq; //TRENT NOISE
+				noiseTexture[y * dims + x] += perlinSample * amplitude;
+				amplitude *= persistence;
+			}
+		}
+	}
+
+	return noiseTexture; //RETURN THE ARRAY REPRESENTATION OF THE 'noise' TEXTURE
+}
+
 std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 {
 	std::vector<float> noiseTexture; //ARRAY OF FLOAT VALUES THAT REPRESENT THE 'NOISE' TEXTURE
@@ -423,7 +464,10 @@ void TextureApplication::startup()
 	m_animatedTexture->load2D("..//[bin]//textures//diffuse", "starfieldDiffuseMap.jpg");
 
 	m_perlinTexture = new Texture();
-	m_perlinTexture->generate2D(64, 64, generateNoiseTexture(64, 64));
+	m_perlinTexture->generate2D(64, 64, generatePerlinNoiseTexture(64, 64));
+
+	m_trentNoiseTexture = new Texture();
+	m_trentNoiseTexture->generate2D(64, 64, generateNoiseTexture(64, 64));
 #pragma endregion
 }
 
@@ -448,6 +492,7 @@ void TextureApplication::shutdown()
 glm::mat4 sphereTransform = glm::mat4(1);
 glm::mat4 planeTransform = glm::mat4(1);
 glm::mat4 perlinPlaneTransform = glm::mat4(1);
+glm::mat4 trentPlaneTransform = glm::mat4(1);
 glm::vec2 deltaUV = glm::vec2(0);
 float runningTime = 0;
 void TextureApplication::update(float deltaTime)
@@ -592,7 +637,15 @@ void TextureApplication::update(float deltaTime)
 		glm::vec4(150, 0, 0, 1)
 	);
 
+	auto trentTranslation = glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(0, 0, 1, 0),
+		glm::vec4(-160, 0, 0, 1)
+	);
+
 	perlinPlaneTransform = perlinTranslation * glm::scale(glm::vec3(1.5)) * planeTransform;
+	trentPlaneTransform = trentTranslation * glm::scale(glm::vec3(1.5)) * planeTransform;
 }
 
 void TextureApplication::draw()
@@ -621,30 +674,30 @@ void TextureApplication::draw()
 	m_shader->unbind();
 #pragma endregion
 
-//#pragma region BumpMappedPlane
-//	m_multTexShader->bind();
-//
-//	m_diffuseMap->bind(GL_TEXTURE0, GL_TEXTURE_2D);
-//	m_normalMap->bind(GL_TEXTURE1, GL_TEXTURE_2D);
-//	m_perlinTexture->bind(GL_TEXTURE2, GL_TEXTURE_2D);
-//
-//	auto bumpmapVPUniform = m_multTexShader->getUniform("WVP");
-//	auto bumpmaplightDirectionUniform = m_multTexShader->getUniform("lightDirection");
-//	auto bumpmapDiffMapUniform = m_multTexShader->getUniform("diffuseMap");
-//	auto bumpmapNormMapUniform = m_multTexShader->getUniform("normalMap");
-//	//auto bumpmapPerlinUniform = m_multTexShader->getUniform("perlinMap");
-//
-//	glUniform3fv(bumpmaplightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION	
-//	glUniform1i(bumpmapDiffMapUniform, 0); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
-//	glUniform1i(bumpmapNormMapUniform, 1); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
-//
-//										   //glUniform1i(bumpmapPerlinUniform, 3);
-//
-//	glUniformMatrix4fv(bumpmapVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * planeTransform));
-//
-//	m_plane->draw(GL_TRIANGLES);
-//	m_multTexShader->unbind();
-//#pragma endregion
+#pragma region BumpMappedPlane
+	m_multTexShader->bind();
+
+	m_diffuseMap->bind(GL_TEXTURE0, GL_TEXTURE_2D);
+	m_normalMap->bind(GL_TEXTURE1, GL_TEXTURE_2D);
+	m_perlinTexture->bind(GL_TEXTURE2, GL_TEXTURE_2D);
+
+	auto bumpmapVPUniform = m_multTexShader->getUniform("WVP");
+	auto bumpmaplightDirectionUniform = m_multTexShader->getUniform("lightDirection");
+	auto bumpmapDiffMapUniform = m_multTexShader->getUniform("diffuseMap");
+	auto bumpmapNormMapUniform = m_multTexShader->getUniform("normalMap");
+	//auto bumpmapPerlinUniform = m_multTexShader->getUniform("perlinMap");
+
+	glUniform3fv(bumpmaplightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION	
+	glUniform1i(bumpmapDiffMapUniform, 0); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
+	glUniform1i(bumpmapNormMapUniform, 1); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
+
+										   //glUniform1i(bumpmapPerlinUniform, 3);
+
+	glUniformMatrix4fv(bumpmapVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * planeTransform));
+
+	m_plane->draw(GL_TRIANGLES);
+	m_multTexShader->unbind();
+#pragma endregion
 
 #pragma region PerlinMesh
 	m_perlinShader->bind();
@@ -660,6 +713,22 @@ void TextureApplication::draw()
 
 	m_perlinShader->unbind();
 #pragma endregion
+
+#pragma region TrentNoiseMesh
+	m_perlinShader->bind();
+	m_trentNoiseTexture->bind(GL_TEXTURE4, GL_TEXTURE_2D);
+
+	auto trentWVPUniform = m_perlinShader->getUniform("WVP");
+	auto trentDiffuseMapUniform = m_perlinShader->getUniform("diffuseMap");
+
+	glUniform1i(trentDiffuseMapUniform, 4);
+	glUniformMatrix4fv(trentWVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * trentPlaneTransform));
+
+	m_perlinMesh->draw(GL_TRIANGLES);
+
+	m_perlinShader->unbind();
+#pragma endregion
+
 }
 
 void TextureApplication::OnGUI()

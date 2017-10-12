@@ -581,3 +581,7 @@ void LightingApp::draw()
 	m_blinn->unbind();
 #pragma endregion
 }
+
+void LightingApp::OnGUI()
+{
+}

@@ -18,4 +18,7 @@ protected:
 	GLFWwindow* _window;
 	GLFWmonitor* _monitor;
 	Camera* _camera;
+
+	// Inherited via Application
+	virtual void OnGUI() override;
 };

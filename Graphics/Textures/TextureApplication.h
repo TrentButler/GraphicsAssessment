@@ -37,4 +37,5 @@ private:
 	Texture* m_normalMap;
 	Texture* m_animatedTexture;
 	Texture* m_perlinTexture;
+	Texture* m_trentNoiseTexture;
 };

@@ -71,6 +71,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)dep\glfw\include\GLFW;$(SolutionDir)dep\glm\glm\glm;$(SolutionDir)bootstrap;$(SolutionDir)dep\imgui;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)dep\glfw\lib-vc2015;$(SolutionDir)dep\bootstrap;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)Release</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
