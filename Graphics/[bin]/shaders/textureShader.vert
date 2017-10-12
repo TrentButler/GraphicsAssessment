@@ -1,9 +1,9 @@
 #version 410
-layout(location = 0) in vec4 Position;
-layout(location = 1) in vec4 Color;
-layout(location = 2) in vec4 Normal;
-layout(location = 3) in vec3 TextureCoord;
-layout(location = 4) in vec4 Tangent;
+layout(location = 0) in vec4 Position; //VERTEX INFORMATION
+layout(location = 1) in vec4 Color; //VERTEX INFORMATION
+layout(location = 2) in vec4 Normal; //VERTEX INFORMATION
+layout(location = 3) in vec3 TextureCoord; //VERTEX INFORMATION
+layout(location = 4) in vec4 Tangent; //VERTEX INFORMATION
 
 out vec4 vertexPosition;
 out vec4 vertexColor;

@@ -351,8 +351,8 @@ std::vector<float> generateNoiseTexture(unsigned int width, unsigned int height)
 			for (int o = 0; o < octaves; o++)
 			{
 				float freq = powf(2, float(o));
-				float perlinSample = glm::perlin(glm::vec2(float(x), float(y)) * scale * freq) * 0.5f + 0.5f; //PERLIN NOISE
-				//float perlinSample = trentNoise(y + x) * scale * freq; //TRENT NOISE
+				//float perlinSample = glm::perlin(glm::vec2(float(x), float(y)) * scale * freq) * 0.5f + 0.5f; //PERLIN NOISE
+				float perlinSample = trentNoise(y + x) * scale * freq; //TRENT NOISE
 				noiseTexture[y * dims + x] += perlinSample * amplitude;
 				amplitude *= persistence;
 			}
@@ -621,30 +621,30 @@ void TextureApplication::draw()
 	m_shader->unbind();
 #pragma endregion
 
-#pragma region BumpMappedPlane
-	m_multTexShader->bind();
-
-	m_diffuseMap->bind(GL_TEXTURE0, GL_TEXTURE_2D);
-	m_normalMap->bind(GL_TEXTURE1, GL_TEXTURE_2D);
-	m_perlinTexture->bind(GL_TEXTURE2, GL_TEXTURE_2D);
-
-	auto bumpmapVPUniform = m_multTexShader->getUniform("WVP");
-	auto bumpmaplightDirectionUniform = m_multTexShader->getUniform("lightDirection");
-	auto bumpmapDiffMapUniform = m_multTexShader->getUniform("diffuseMap");
-	auto bumpmapNormMapUniform = m_multTexShader->getUniform("normalMap");
-	//auto bumpmapPerlinUniform = m_multTexShader->getUniform("perlinMap");
-
-	glUniform3fv(bumpmaplightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION	
-	glUniform1i(bumpmapDiffMapUniform, 0); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
-	glUniform1i(bumpmapNormMapUniform, 1); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
-
-										   //glUniform1i(bumpmapPerlinUniform, 3);
-
-	glUniformMatrix4fv(bumpmapVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * planeTransform));
-
-	m_plane->draw(GL_TRIANGLES);
-	m_multTexShader->unbind();
-#pragma endregion
+//#pragma region BumpMappedPlane
+//	m_multTexShader->bind();
+//
+//	m_diffuseMap->bind(GL_TEXTURE0, GL_TEXTURE_2D);
+//	m_normalMap->bind(GL_TEXTURE1, GL_TEXTURE_2D);
+//	m_perlinTexture->bind(GL_TEXTURE2, GL_TEXTURE_2D);
+//
+//	auto bumpmapVPUniform = m_multTexShader->getUniform("WVP");
+//	auto bumpmaplightDirectionUniform = m_multTexShader->getUniform("lightDirection");
+//	auto bumpmapDiffMapUniform = m_multTexShader->getUniform("diffuseMap");
+//	auto bumpmapNormMapUniform = m_multTexShader->getUniform("normalMap");
+//	//auto bumpmapPerlinUniform = m_multTexShader->getUniform("perlinMap");
+//
+//	glUniform3fv(bumpmaplightDirectionUniform, 1, glm::value_ptr(lightDirection)); // SEND THE PHONG SHADER THE LIGHTS DIRECTION	
+//	glUniform1i(bumpmapDiffMapUniform, 0); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
+//	glUniform1i(bumpmapNormMapUniform, 1); //TELL SHADER PROGRAM WHICH SHADER SLOT TO LOAD FROM
+//
+//										   //glUniform1i(bumpmapPerlinUniform, 3);
+//
+//	glUniformMatrix4fv(bumpmapVPUniform, 1, GL_FALSE, glm::value_ptr(viewProjection * planeTransform));
+//
+//	m_plane->draw(GL_TRIANGLES);
+//	m_multTexShader->unbind();
+//#pragma endregion
 
 #pragma region PerlinMesh
 	m_perlinShader->bind();
